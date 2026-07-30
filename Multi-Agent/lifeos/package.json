@@ -1,0 +1,19 @@
+{
+  "name": "lifeos-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LifeOS - Premium Autonomous AI Operating System Foundation",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/web",
+    "build": "npm run build --workspaces",
+    "start": "npm run start --workspace=apps/web",
+    "lint": "npm run lint --workspaces"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

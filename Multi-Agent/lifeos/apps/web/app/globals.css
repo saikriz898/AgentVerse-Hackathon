@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 60 9% 98%;          /* #FAFAF8 */
+    --surface: 0 0% 100%;             /* #FFFFFF */
+    --surface-secondary: 60 5% 95%;   /* #F4F4F2 */
+    --border: 20 6% 90%;              /* #E7E5E4 */
+    
+    --text-primary: 221 39% 11%;      /* #111827 */
+    --text-secondary: 215 16% 34%;    /* #4B5563 */
+    --text-muted: 218 11% 65%;        /* #9CA3AF */
+
+    --accent-primary: 168 56% 28%;    /* #1F6F5F */
+    --accent-hover: 168 56% 22%;      /* #19594D */
+    --accent-pressed: 168 56% 18%;    /* #15463D */
+    --accent-light: 164 43% 93%;      /* #E7F5F1 */
+
+    --success: 153 40% 30%;           /* #2D6A4F */
+    --warning: 38 76% 43%;            /* #C0841A */
+    --error: 6 60% 46%;               /* #C0392B */
+
+    --radius: 18px;                   /* Fixed Quiet Luxury 18px radius */
+  }
+
+  .dark {
+    --background: 220 18% 7%;         /* #0F1115 */
+    --surface: 222 13% 10%;           /* #17191E */
+    --surface-secondary: 218 15% 14%; /* #1F232A */
+    --border: 213 14% 20%;            /* #2D333B */
+
+    --text-primary: 210 40% 98%;      /* #F8FAFC */
+    --text-secondary: 215 25% 84%;    /* #CBD5E1 */
+    --text-muted: 215 16% 65%;        /* #94A3B8 */
+
+    --accent-primary: 161 35% 47%;    /* #4FA38A */
+    --accent-hover: 161 36% 38%;      /* #3F8671 */
+    --accent-pressed: 161 36% 31%;    /* #336B5A */
+    --accent-light: 161 28% 15%;      /* #19342C */
+
+    --success: 122 39% 49%;
+    --warning: 32 95% 44%;
+    --error: 0 65% 51%;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--text-primary));
+    font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.011em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Quiet Luxury Micro-Transitions (180ms - 280ms cubic-bezier) */
+.transition-luxury {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: 230ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Quiet Luxury Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--text-muted));
+}
