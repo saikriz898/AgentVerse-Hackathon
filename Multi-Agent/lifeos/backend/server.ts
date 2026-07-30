@@ -27,6 +27,14 @@ const PORT = process.env.PORT || 4001;
 app.use(cors());
 app.use(express.json());
 
+// Express Error Handler for Malformed JSON Payloads
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (err instanceof SyntaxError && 'status' in err && (err as any).status === 400) {
+    return res.status(400).json({ error: 'Invalid JSON payload format in request body' });
+  }
+  next(err);
+});
+
 // 1. Health Endpoint (Gateway & All 10 Services)
 app.get('/health', async (req, res) => {
   const dashboard = healthMonitor.getFullDashboardHealth();

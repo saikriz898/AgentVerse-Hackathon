@@ -4,142 +4,102 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import {
-  Search,
-  Database,
-  FileText,
-  FolderKanban,
-  CheckSquare,
-  Bookmark,
-  Sparkles,
-  Command,
-  ArrowRight,
-} from 'lucide-react';
+import { Search, Sparkles, Database, FileText, FolderKanban } from 'lucide-react';
+import { ApiClient } from '@/lib/apiClient';
 
 export const SearchView: React.FC = () => {
   const [query, setQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
 
-  const SEARCH_RESULTS = [
-    {
-      title: 'LifeOS PRD Technical Specification',
-      category: 'Documents',
-      icon: FileText,
-      snippet: 'Dual-Engine platform combining Chief of Staff orchestrator with 7 SDLC Specialist Departments...',
-      relevance: '98.4% RRF Match',
-      date: '12:43 PM',
-    },
-    {
-      title: 'Neon pgvector 768-Dim Database Schema',
-      category: 'Knowledge',
-      icon: Database,
-      snippet: 'Reciprocal Rank Fusion hybrid search (768-dim embeddings + BM25 keyword matching)...',
-      relevance: '96.2% RRF Match',
-      date: 'Yesterday',
-    },
-    {
-      title: 'Build School ERP Startup App',
-      category: 'Projects',
-      icon: FolderKanban,
-      snippet: 'Full end-to-end SDLC pipeline executed across 7 specialist departments...',
-      relevance: '94.8% RRF Match',
-      date: '2 hours ago',
-    },
-    {
-      title: 'Security QA Gate Score >= 80 Audit',
-      category: 'Artifacts',
-      icon: Sparkles,
-      snippet: '0 High severity vulnerabilities found. Passed SQLi scanner & secret scanner...',
-      relevance: '92.1% RRF Match',
-      date: 'Just now',
-    },
-  ];
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+    setLoading(true);
+    setSearched(true);
+    try {
+      const data = await ApiClient.universalSearch(query);
+      setResults(data.results || []);
+    } catch (err) {
+      console.warn('Universal Search API fallback...', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 select-none">
-      {/* Hero Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/60 pb-5">
+    <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 pb-20 md:pb-8">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/60 pb-6">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Badge variant="accent" className="flex items-center gap-1.5">
-              <Search className="h-3 w-3 stroke-[2]" /> RRF Vector Search
-            </Badge>
-            <Badge variant="outline">768-Dim Hybrid Embeddings</Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="accent">Universal Index Search</Badge>
+            <Badge variant="outline" className="font-mono">Global Registry</Badge>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-            Universal Workspace Search
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-text-primary md:text-3xl">
+            Search Engine
           </h1>
           <p className="text-sm text-text-secondary">
-            Search instantly across Projects, Tasks, Documents, Knowledge Graph, Conversations, and Memory.
+            Search indexed Projects, Tasks, Artifacts, Vector Memory, and System Audit Logs.
           </p>
         </div>
       </div>
 
-      {/* Main Command Input Box */}
-      <div className="relative w-full max-w-3xl mx-auto">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-accent-primary" />
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search projects, documents, memory, artifacts or type / for commands..."
-          className="w-full h-14 rounded-2xl border border-border bg-surface-1 pl-12 pr-16 text-sm text-text-primary focus:outline-none focus:border-accent-primary shadow-lg transition-all"
-        />
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs text-text-muted">
-          <kbd className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface px-2 py-1 text-[10px] font-mono">
-            <Command className="h-3 w-3" /> K
-          </kbd>
+      {/* Big Search Form */}
+      <form onSubmit={handleSearch} className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-text-muted" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search across all projects, vector memory, artifacts, or code specs..."
+            className="w-full rounded-2xl border border-border bg-surface-2 pl-12 pr-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-primary transition-luxury shadow-inner"
+          />
         </div>
-      </div>
+        <Button variant="primary" size="md" type="submit" disabled={loading}>
+          <Sparkles className="mr-2 h-4 w-4" /> Universal Search
+        </Button>
+      </form>
 
-      {/* Category Tabs */}
-      <div className="flex items-center justify-center gap-2 flex-wrap">
-        {['all', 'Documents', 'Knowledge', 'Projects', 'Artifacts', 'Memory'].map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl border transition-luxury capitalize ${
-              activeCategory === cat
-                ? 'bg-accent-light text-accent-primary border-accent-primary/40 font-bold'
-                : 'border-border text-text-muted hover:text-text-primary'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
+      {/* Search Results Catalog */}
+      {searched && (
+        <div className="space-y-4">
+          <h2 className="text-base font-bold text-text-primary">Search Results ({results.length})</h2>
 
-      {/* Results List */}
-      <div className="max-w-3xl mx-auto space-y-3">
-        {SEARCH_RESULTS.map((res, idx) => {
-          const Icon = res.icon;
-          return (
-            <Card key={idx} className="bg-surface-1 p-4 hover:border-accent-primary/60 transition-luxury flex items-center justify-between group">
-              <div className="flex items-start gap-3.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-light text-accent-primary shrink-0 mt-0.5">
-                  <Icon className="h-5 w-5 stroke-[1.75]" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-bold text-text-primary group-hover:text-accent-primary transition-colors">
-                      {res.title}
-                    </h3>
-                    <Badge variant="outline">{res.category}</Badge>
-                  </div>
-                  <p className="text-xs text-text-secondary mt-1 leading-relaxed line-clamp-1">
-                    {res.snippet}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col items-end shrink-0 ml-4">
-                <span className="text-[11px] font-semibold text-emerald-500">{res.relevance}</span>
-                <span className="text-[10px] text-text-muted">{res.date}</span>
-              </div>
+          {results.length === 0 && !loading && (
+            <Card className="p-8 text-center text-xs text-text-muted">
+              No matching records found for "{query}". Try a different keyword or vector query.
             </Card>
-          );
-        })}
-      </div>
-    </div>
+          )}
+
+          <div className="space-y-3">
+            {results.map((res) => (
+              <Card key={res.id} className="p-5 bg-surface-1 space-y-2 border border-border hover:border-accent-primary/60 transition-luxury">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {res.type === 'Artifact' ? (
+                      <FileText className="h-4 w-4 text-emerald-400" />
+                    ) : res.type === 'Memory' ? (
+                      <Database className="h-4 w-4 text-indigo-400" />
+                    ) : (
+                      <FolderKanban className="h-4 w-4 text-accent-primary" />
+                    )}
+                    <span className="font-bold text-sm text-text-primary">{res.title}</span>
+                  </div>
+                  <Badge variant="outline" className="font-mono text-[10px]">
+                    {res.type} • Score: {(res.score || 0.95).toFixed(2)}
+                  </Badge>
+                </div>
+                <p className="text-xs text-text-secondary font-mono leading-relaxed bg-surface-secondary p-3 rounded-xl border border-border/40">
+                  {res.snippet}
+                </p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+    </main>
   );
 };

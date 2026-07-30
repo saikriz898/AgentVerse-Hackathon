@@ -1,120 +1,108 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import {
-  FileText,
-  Plus,
-  Sparkles,
-  FileCode,
-  Download,
-  Share2,
-  Edit,
-  RotateCcw,
-  CheckCircle2,
-  ArrowUpRight,
-} from 'lucide-react';
+import { FileText, Download, Sparkles, RefreshCw, Eye } from 'lucide-react';
+import { ApiClient } from '@/lib/apiClient';
 
 export const DocumentsView: React.FC = () => {
-  const DOCUMENTS = [
-    {
-      id: 'doc-1',
-      title: 'LifeOS Product Requirements Document (PRD) V1',
-      type: 'Executive PRD',
-      author: 'Communication Agent',
-      lastEdited: '10 mins ago',
-      version: 'v1.4.0',
-      status: 'Approved',
-      summary: 'Production PRD specification covering Chief of Staff orchestration, single-agent contracts, and Next.js design system.',
-    },
-    {
-      id: 'doc-2',
-      title: 'Multi-Cloud Price Comparison & Infrastructure ROI',
-      type: 'Financial Report',
-      author: 'Finance Agent',
-      lastEdited: '1 hour ago',
-      version: 'v2.1.0',
-      status: 'Under Review',
-      summary: '20+ cost parameter estimator for spot vs reserved AWS/GCP instances with break-even timeline.',
-    },
-    {
-      id: 'doc-3',
-      title: 'Security Scan Audit & QA Quality Evaluation',
-      type: 'Security Report',
-      author: 'Review Agent',
-      lastEdited: '3 hours ago',
-      version: 'v1.0.2',
-      status: 'Passed (94/100)',
-      summary: 'SQLi, secret scanner, and 11-criteria code quality report confirming zero high-severity vulnerabilities.',
-    },
-  ];
+  const [artifacts, setArtifacts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedArtifact, setSelectedArtifact] = useState<any | null>(null);
+
+  const fetchArtifacts = async () => {
+    setLoading(true);
+    try {
+      const data = await ApiClient.getArtifacts();
+      setArtifacts(data.artifacts || []);
+      if (data.artifacts && data.artifacts.length > 0) {
+        setSelectedArtifact(data.artifacts[0]);
+      }
+    } catch (err) {
+      console.warn('Artifacts API fallback...', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchArtifacts();
+  }, []);
 
   return (
     <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 pb-20 md:pb-8">
-      {/* Hero Header & Actions */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/60 pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <Badge variant="accent">Document Workspace</Badge>
-            <Badge variant="outline">19 Output Formats</Badge>
+            <Badge variant="accent">Artifact & Document Manager</Badge>
+            <Badge variant="outline" className="font-mono">Realtime Specs</Badge>
           </div>
           <h1 className="mt-2 text-2xl font-bold tracking-tight text-text-primary md:text-3xl">
-            Documents
+            Documents & Artifacts ({artifacts.length})
           </h1>
           <p className="text-sm text-text-secondary">
-            Create, organize and collaborate on executive documents with AI synthesis.
+            Generated PRDs, System Architecture Specs, DB Schemas, and QA Reports stored in LifeOS Core Backend.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <Button variant="outline" size="sm">
-            <Sparkles className="mr-2 h-4 w-4 stroke-[1.75]" /> AI Writer
-          </Button>
-          <Button variant="primary" size="sm" className="font-semibold">
-            <Plus className="mr-2 h-4 w-4 stroke-[2]" /> New Document
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={fetchArtifacts} disabled={loading}>
+            <RefreshCw className={`mr-2 h-4 w-4 stroke-[1.75] ${loading ? 'animate-spin' : ''}`} /> Refresh
           </Button>
         </div>
       </div>
 
-      {/* Document Catalog Cards */}
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-        {DOCUMENTS.map((doc) => (
-          <Card key={doc.id} className="bg-surface-1 p-6 flex flex-col justify-between hover:border-accent-primary/60 transition-luxury">
-            <div>
+      {/* Artifact Grid & Live Viewer */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column: Artifact List */}
+        <div className="space-y-3 lg:col-span-1">
+          {artifacts.map((art) => (
+            <Card
+              key={art.id}
+              onClick={() => setSelectedArtifact(art)}
+              className={`p-4 cursor-pointer transition-luxury border ${
+                selectedArtifact?.id === art.id ? 'border-accent-primary bg-accent-light/10' : 'bg-surface-1 border-border'
+              }`}
+            >
               <div className="flex items-center justify-between">
-                <Badge variant={doc.status.includes('Approved') || doc.status.includes('Passed') ? 'success' : 'warning'}>
-                  {doc.status}
-                </Badge>
-                <span className="text-[10px] font-mono text-text-muted">{doc.version}</span>
+                <div className="flex items-center gap-2.5">
+                  <FileText className="h-4 w-4 text-accent-primary" />
+                  <span className="font-bold text-xs text-text-primary">{art.title}</span>
+                </div>
+                <Badge variant="outline" className="font-mono text-[10px]">{art.version}</Badge>
+              </div>
+              <p className="mt-2 text-[11px] text-text-muted line-clamp-1">{art.category} • Author: {art.authorAgent || 'Chief of Staff'}</p>
+            </Card>
+          ))}
+        </div>
+
+        {/* Right Column: Selected Artifact Content Viewer */}
+        <div className="lg:col-span-2">
+          {selectedArtifact ? (
+            <Card className="p-6 bg-surface-1 space-y-4 border border-border">
+              <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                <div>
+                  <h2 className="font-bold text-base text-text-primary">{selectedArtifact.title}</h2>
+                  <span className="text-xs font-mono text-text-muted">Version {selectedArtifact.version}</span>
+                </div>
+                <Button variant="outline" size="sm">
+                  <Download className="mr-1.5 h-3.5 w-3.5" /> Download Markdown
+                </Button>
               </div>
 
-              <h3 className="mt-3 text-sm font-bold text-text-primary leading-snug">{doc.title}</h3>
-              <p className="mt-2 text-xs text-text-secondary leading-relaxed">{doc.summary}</p>
-
-              {/* AI Quick Actions Toolbar */}
-              <div className="mt-4 pt-3 border-t border-border/60 flex items-center gap-2">
-                <button className="text-[11px] font-semibold text-accent-primary hover:underline">
-                  Rewrite
-                </button>
-                <span className="text-text-muted">•</span>
-                <button className="text-[11px] font-semibold text-accent-primary hover:underline">
-                  Summarize
-                </button>
-                <span className="text-text-muted">•</span>
-                <button className="text-[11px] font-semibold text-accent-primary hover:underline">
-                  Review
-                </button>
+              <div className="bg-surface-secondary p-5 rounded-xl border border-border/60 font-mono text-xs text-text-primary overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
+                {selectedArtifact.content}
               </div>
-            </div>
-
-            <div className="mt-5 pt-3 border-t border-border/60 flex items-center justify-between text-[11px] text-text-muted">
-              <span>Author: <strong className="text-text-primary">{doc.author}</strong></span>
-              <span>{doc.lastEdited}</span>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          ) : (
+            <Card className="p-8 bg-surface-1 text-center text-text-muted text-xs">
+              Select an artifact to preview specification details.
+            </Card>
+          )}
+        </div>
       </div>
     </main>
   );

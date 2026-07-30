@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { ApiClient } from '../apiClient';
 
 export interface ChatMessage {
   id: string;
@@ -18,7 +19,7 @@ export interface WorkflowNodeState {
   department: string;
   title: string;
   status: 'queued' | 'running' | 'completed' | 'failed';
-  progressPercent: number; // 0 - 100%
+  progressPercent: number;
   durationMs?: number;
   confidenceScore?: number;
   tokensUsed?: number;
@@ -75,58 +76,76 @@ export interface AIWorkspaceState {
   toggleDeepResearch: () => void;
   toggleMemorySync: () => void;
   sendPrompt: (promptText: string) => Promise<void>;
+  loadBackendHistory: () => Promise<void>;
 }
 
 const DEFAULT_WORKFLOW_NODES: WorkflowNodeState[] = [
   {
-    id: 'intent',
-    agentRole: 'Intent Understanding',
-    department: 'Chief of Staff Core',
-    title: 'User Prompt Intent Analysis',
+    id: 'research',
+    agentRole: 'Multi-Source Search',
+    department: 'Research Agent (:8000)',
+    title: 'Deep Web Intelligence Discovery',
     status: 'completed',
     progressPercent: 100,
-    durationMs: 140,
+    durationMs: 340,
     confidenceScore: 0.99,
-    tokensUsed: 850,
+    tokensUsed: 1250,
     assignedTasks: [
-      { title: 'Intent Classification', status: 'completed' },
-      { title: 'Dynamic Workflow Construction', status: 'completed' },
+      { title: 'Paper Summarization', status: 'completed' },
+      { title: 'Fact Verification', status: 'completed' },
     ],
   },
   {
     id: 'memory',
-    agentRole: 'Context Memory Retrieval',
-    department: 'Vector Memory Store',
-    title: '768-Dim RRF Hybrid Context Sync',
+    agentRole: 'Vector Memory Retrieval',
+    department: 'Memory Agent (:4000)',
+    title: '768-Dim RRF Hybrid Context Ingestion',
     status: 'completed',
     progressPercent: 100,
-    durationMs: 220,
+    durationMs: 180,
     confidenceScore: 0.98,
-    tokensUsed: 1420,
+    tokensUsed: 890,
     assignedTasks: [
       { title: 'Neon pgvector Query', status: 'completed' },
-      { title: 'Pinned Document Retrieval', status: 'completed' },
+      { title: 'Graph Memory Sync', status: 'completed' },
     ],
   },
   {
-    id: 'delivery',
-    agentRole: 'Executive Delivery',
-    department: 'Chief of Staff Core',
-    title: 'Deliverable Synthesis & Artifact Generation',
+    id: 'planning',
+    agentRole: 'Workflow Synthesizer',
+    department: 'Planning Agent (:8000)',
+    title: 'LangGraph Task DAG Orchestration',
     status: 'completed',
     progressPercent: 100,
-    durationMs: 480,
+    durationMs: 420,
+    confidenceScore: 0.97,
     tokensUsed: 2100,
     assignedTasks: [
-      { title: 'Executive Response Formatting', status: 'completed' },
-      { title: 'Artifact Connection', status: 'completed' },
+      { title: 'Dependency Resolution', status: 'completed' },
+      { title: 'Milestone Estimation', status: 'completed' },
+    ],
+  },
+  {
+    id: 'review',
+    agentRole: 'QA Security Scanner',
+    department: 'Review Agent (:8000)',
+    title: 'QA Gate Verification (Score >= 80)',
+    status: 'completed',
+    progressPercent: 100,
+    durationMs: 250,
+    confidenceScore: 0.99,
+    qaScore: 96,
+    tokensUsed: 1400,
+    assignedTasks: [
+      { title: 'SQLi & Secret Scanner', status: 'completed' },
+      { title: 'Zero Vulnerability Gate Audit', status: 'completed' },
     ],
   },
 ];
 
 const DEFAULT_SESSION: Session = {
   id: 'sess-1',
-  title: 'LifeOS System Overview',
+  title: 'LifeOS Core Autonomous Session',
   category: 'General',
   time: 'Just now',
   isPinned: true,
@@ -134,45 +153,13 @@ const DEFAULT_SESSION: Session = {
     {
       id: 'msg-1',
       sender: 'chief_of_staff',
-      text: 'Good afternoon. I am your Chief of Staff AI. All internal capabilities and vector memory partitions are online. How can I assist you with your projects today?',
+      text: 'Welcome to LifeOS V2.0 AI Operating System. Chief of Staff & 6 Specialist Microservice Agents are connected and ready.',
       timestamp: '12:42 PM',
     },
   ],
   workflowNodes: DEFAULT_WORKFLOW_NODES,
-  artifacts: [
-    {
-      id: 'art-1',
-      title: 'lifeos-architecture-spec.json',
-      type: 'json',
-      version: 'v1.0.0',
-      createdAt: '12:43 PM',
-      content: `{
-  "system": "LifeOS Multi-Agent Platform",
-  "orchestrator": "Chief of Staff AI",
-  "capabilities": [
-    "Requirement Analysis",
-    "Product Planning",
-    "System Architecture",
-    "Project Management",
-    "Software Engineering",
-    "Quality Assurance",
-    "DevOps & Documentation"
-  ],
-  "qa_approval_threshold": 80,
-  "vector_search": "Reciprocal Rank Fusion (768-dim + BM25)"
-}`,
-    },
-  ],
-  memoryEntries: [
-    {
-      id: 'mem-1',
-      key: 'System Architecture',
-      value: 'Unified Chief of Staff AI orchestrating internal specialist capabilities dynamically',
-      confidence: 0.99,
-      source: 'System Manifest',
-      timestamp: '12:40 PM',
-    },
-  ],
+  artifacts: [],
+  memoryEntries: [],
   isWorkflowActive: true,
 };
 
@@ -193,7 +180,7 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
     const newId = `sess-${Date.now()}`;
     const newSession: Session = {
       id: newId,
-      title: 'New Autonomous Session',
+      title: 'Autonomous Multi-Agent Session',
       category,
       time: 'Just now',
       isPinned: false,
@@ -237,6 +224,24 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
     }));
   },
 
+  loadBackendHistory: async () => {
+    try {
+      const history = await ApiClient.getWorkflowHistory();
+      if (history.workflows && history.workflows.length > 0) {
+        const lastWf = history.workflows[0];
+        set((state) => {
+          const currentActive = state.sessions.find((s) => s.id === state.activeSessionId);
+          if (currentActive && lastWf.artifact && currentActive.artifacts.length === 0) {
+            currentActive.artifacts = [lastWf.artifact];
+          }
+          return { sessions: [...state.sessions] };
+        });
+      }
+    } catch (err) {
+      console.warn('[WorkspaceStore] History sync pending backend connection.');
+    }
+  },
+
   sendPrompt: async (promptText) => {
     const { activeSessionId, sessions } = get();
     const activeSession = sessions.find((s) => s.id === activeSessionId);
@@ -249,10 +254,9 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
       timestamp,
     };
 
-    // 1. Instantly append user message & activate workflow
     set((state) => ({
       isThinking: true,
-      streamingPhase: 'Calling Chief of Staff API Gateway (/api/workflows/execute)...',
+      streamingPhase: 'Orchestrating 6 microservice agents via LifeOS Core Gateway...',
       sessions: state.sessions.map((s) =>
         s.id === activeSessionId
           ? {
@@ -266,14 +270,8 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
     }));
 
     try {
-      // Real API Call to Chief of Staff Next.js Gateway
-      const res = await fetch('/api/workflows/execute', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ promptText, category: activeSession?.category || 'General' }),
-      });
-
-      const data = await res.json();
+      // Execute Workflow via LifeOS Core API Client
+      const data = await ApiClient.executeWorkflow(promptText, activeSession?.category || 'General');
 
       const aiMessage: ChatMessage = {
         id: `msg-ai-${Date.now()}`,
@@ -281,6 +279,25 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
         text: data.chiefOfStaffResponse || `Chief of Staff executed task: "${promptText}".`,
         timestamp: data.timestamp || timestamp,
       };
+
+      // Map backend execution steps if returned
+      const updatedNodes = data.steps && data.steps.length > 0
+        ? data.steps.map((st: any) => ({
+            id: st.id,
+            agentRole: st.name,
+            department: `${st.agentId.toUpperCase()} Agent`,
+            title: st.name,
+            status: st.status === 'Completed' ? 'completed' : st.status === 'Failed' ? 'failed' : 'running',
+            progressPercent: 100,
+            durationMs: st.durationMs,
+            tokensUsed: 1200,
+            assignedTasks: [{ title: st.name, status: 'completed' }],
+          }))
+        : DEFAULT_WORKFLOW_NODES.map((n) => ({
+            ...n,
+            status: 'completed',
+            progressPercent: 100,
+          }));
 
       set((state) => ({
         isThinking: false,
@@ -291,19 +308,14 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
                 ...s,
                 messages: [...s.messages, aiMessage],
                 artifacts: data.artifact ? [data.artifact, ...s.artifacts] : s.artifacts,
-                workflowNodes: s.workflowNodes.map((n) => ({
-                  ...n,
-                  status: 'completed',
-                  progressPercent: 100,
-                  assignedTasks: n.assignedTasks.map((t) => ({ ...t, status: 'completed' })),
-                })),
+                workflowNodes: updatedNodes,
                 memoryEntries: [
                   {
                     id: `mem-${Date.now()}`,
                     key: `Task Executed: ${promptText.slice(0, 20)}`,
                     value: aiMessage.text,
                     confidence: 0.98,
-                    source: 'Chief of Staff Gateway',
+                    source: 'LifeOS Core Gateway',
                     timestamp,
                   },
                   ...s.memoryEntries,
@@ -312,8 +324,7 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
             : s
         ),
       }));
-    } catch (err) {
-      // Fallback response if offline
+    } catch (err: any) {
       const fallbackMsg: ChatMessage = {
         id: `msg-ai-${Date.now()}`,
         sender: 'chief_of_staff',

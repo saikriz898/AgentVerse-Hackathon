@@ -14,6 +14,7 @@ export interface AgentMetadata {
   healthEndpoint: string;
   capabilities: string[];
   timeoutMs: number;
+  latencyMs: number;
   status: 'Online' | 'Offline' | 'Degraded' | 'Disabled';
   health: 'Healthy' | 'Warning' | 'Critical';
   lastSeen: string;
@@ -41,6 +42,7 @@ class AgentRegistry {
         healthEndpoint: '/health',
         capabilities: ['Deep Search', 'SerpAPI', 'Paper Summarization', 'Fact Verification'],
         timeoutMs: 15000,
+        latencyMs: 32,
         status: 'Online',
         health: 'Healthy',
         lastSeen: new Date().toISOString(),
@@ -58,6 +60,7 @@ class AgentRegistry {
         healthEndpoint: '/health',
         capabilities: ['768-dim Embeddings', 'Hybrid BM25 RRF', 'Graph Memory', 'Context Injection'],
         timeoutMs: 10000,
+        latencyMs: 18,
         status: 'Online',
         health: 'Healthy',
         lastSeen: new Date().toISOString(),
@@ -75,6 +78,7 @@ class AgentRegistry {
         healthEndpoint: '/health',
         capabilities: ['DAG Generation', 'Dependency Resolution', 'Milestone Estimation', 'PRD Structuring'],
         timeoutMs: 20000,
+        latencyMs: 42,
         status: 'Online',
         health: 'Healthy',
         lastSeen: new Date().toISOString(),
@@ -92,6 +96,7 @@ class AgentRegistry {
         healthEndpoint: '/health',
         capabilities: ['Cost Calculation', 'Token Usage Prediction', 'Budget Auditing', 'ROI Modeling'],
         timeoutMs: 10000,
+        latencyMs: 24,
         status: 'Online',
         health: 'Healthy',
         lastSeen: new Date().toISOString(),
@@ -109,6 +114,7 @@ class AgentRegistry {
         healthEndpoint: '/health',
         capabilities: ['QA Gate Audit (>=80)', 'SQLi & Secret Scanner', 'Linter Audit', 'Vulnerability Gate'],
         timeoutMs: 15000,
+        latencyMs: 36,
         status: 'Online',
         health: 'Healthy',
         lastSeen: new Date().toISOString(),
@@ -126,6 +132,7 @@ class AgentRegistry {
         healthEndpoint: '/health',
         capabilities: ['Markdown Formatting', 'Email Dispatch', 'Webhook Delivery', 'Slack Sync'],
         timeoutMs: 12000,
+        latencyMs: 28,
         status: 'Online',
         health: 'Healthy',
         lastSeen: new Date().toISOString(),
