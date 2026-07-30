@@ -64,11 +64,12 @@ export const WorkflowExecutionPanel: React.FC = () => {
         </Badge>
       </div>
 
-      {/* Nodes List */}
-      <div className="space-y-2">
+      {/* Live Animated Progress Bars List */}
+      <div className="space-y-2.5">
         {workflowNodes.map((node) => {
           const Icon = ICON_MAP[node.id] || Activity;
           const isExpanded = expandedNodeId === node.id;
+          const progress = node.status === 'completed' ? 100 : node.progressPercent || 0;
 
           return (
             <div
@@ -80,42 +81,55 @@ export const WorkflowExecutionPanel: React.FC = () => {
                 node.status === 'queued' && 'border-border/60 bg-surface-2/40 opacity-60'
               )}
             >
-              {/* Header Row */}
+              {/* Node Row Header */}
               <button
                 onClick={() => setExpandedNodeId(isExpanded ? null : node.id)}
-                className="flex w-full items-center justify-between p-3 text-left transition-luxury"
+                className="flex w-full flex-col p-3 text-left transition-luxury space-y-2"
               >
-                <div className="flex items-center gap-3">
-                  {node.status === 'completed' && (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                  )}
-                  {node.status === 'running' && (
-                    <Clock className="h-4 w-4 text-accent-primary animate-spin shrink-0" />
-                  )}
-                  {node.status === 'queued' && (
-                    <Circle className="h-4 w-4 text-text-muted shrink-0" />
-                  )}
+                <div className="flex w-full items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {node.status === 'completed' && (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                    )}
+                    {node.status === 'running' && (
+                      <Clock className="h-4 w-4 text-accent-primary animate-spin shrink-0" />
+                    )}
+                    {node.status === 'queued' && (
+                      <Circle className="h-4 w-4 text-text-muted shrink-0" />
+                    )}
 
-                  <div className="flex items-center gap-2">
-                    <Icon className="h-4 w-4 text-text-secondary shrink-0" />
-                    <span className="text-xs font-bold text-text-primary">{node.agentRole}:</span>
-                    <span className="text-xs text-text-secondary truncate">{node.title}</span>
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-4 w-4 text-text-secondary shrink-0" />
+                      <span className="text-xs font-bold text-text-primary">{node.agentRole}:</span>
+                      <span className="text-xs text-text-secondary truncate">{node.title}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[10px] font-mono text-text-muted font-bold">
+                      {progress}%
+                    </span>
+                    <ChevronDown
+                      className={cn('h-4 w-4 text-text-muted transition-transform duration-200', isExpanded && 'rotate-180')}
+                    />
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                  {node.durationMs && (
-                    <span className="text-[10px] font-mono text-text-muted">
-                      {(node.durationMs / 1000).toFixed(2)}s
-                    </span>
-                  )}
-                  <ChevronDown
-                    className={cn('h-4 w-4 text-text-muted transition-transform duration-200', isExpanded && 'rotate-180')}
+                {/* Animated Progress Bar Indicator */}
+                <div className="h-1.5 w-full bg-surface-2 rounded-full overflow-hidden">
+                  <div
+                    className={cn(
+                      'h-full rounded-full transition-all duration-500',
+                      node.status === 'completed' && 'bg-emerald-500',
+                      node.status === 'running' && 'bg-accent-primary animate-pulse',
+                      node.status === 'queued' && 'bg-border'
+                    )}
+                    style={{ width: `${progress}%` }}
                   />
                 </div>
               </button>
 
-              {/* Node Expandable Details */}
+              {/* Expandable Details */}
               {isExpanded && node.details && (
                 <div className="border-t border-border/40 p-3 bg-surface-2/60 space-y-2 text-xs text-text-secondary">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px]">

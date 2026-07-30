@@ -1,8 +1,23 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Paperclip, Mic, ArrowUp, Command, FileText, Sparkles, Terminal, Code } from 'lucide-react';
+import {
+  Paperclip,
+  Mic,
+  ArrowUp,
+  Command,
+  FileText,
+  Sparkles,
+  Terminal,
+  Search,
+  Database,
+  Play,
+  FileCode,
+  ShieldCheck,
+} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useAIWorkspaceStore } from '@/lib/stores/useAIWorkspaceStore';
+import { cn } from '@/lib/utils';
 
 export interface ComposerProps {
   onSend?: (message: string) => void;
@@ -12,6 +27,8 @@ export const Composer: React.FC<ComposerProps> = ({ onSend }) => {
   const [text, setText] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
   const [showSlashMenu, setShowSlashMenu] = useState(false);
+
+  const { isDeepResearch, isMemorySyncEnabled, toggleDeepResearch, toggleMemorySync } = useAIWorkspaceStore();
 
   const SLASH_COMMANDS = [
     { command: '/prd', description: 'Generate a 10-stage PRD technical specification' },
@@ -46,6 +63,57 @@ export const Composer: React.FC<ComposerProps> = ({ onSend }) => {
 
   return (
     <div className="relative w-full max-w-4xl mx-auto rounded-2xl border border-border bg-surface-1 p-3.5 shadow-lg transition-luxury">
+      {/* Mode Toggles Toolbar */}
+      <div className="flex flex-wrap items-center gap-2 pb-2.5 mb-2 border-b border-border/60 text-xs">
+        <button
+          onClick={toggleDeepResearch}
+          className={cn(
+            'flex items-center gap-1.5 px-2.5 py-1 rounded-xl font-medium border transition-luxury',
+            isDeepResearch
+              ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400 font-semibold'
+              : 'border-border text-text-muted hover:text-text-primary'
+          )}
+        >
+          <Search className="h-3.5 w-3.5" />
+          <span>Deep Research: {isDeepResearch ? 'ON' : 'OFF'}</span>
+        </button>
+
+        <button
+          onClick={toggleMemorySync}
+          className={cn(
+            'flex items-center gap-1.5 px-2.5 py-1 rounded-xl font-medium border transition-luxury',
+            isMemorySyncEnabled
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 font-semibold'
+              : 'border-border text-text-muted hover:text-text-primary'
+          )}
+        >
+          <Database className="h-3.5 w-3.5" />
+          <span>Memory RRF Sync: {isMemorySyncEnabled ? 'ON' : 'OFF'}</span>
+        </button>
+
+        {/* Action Button Chips */}
+        <div className="ml-auto flex items-center gap-1.5">
+          <button
+            onClick={() => onSend?.('/prd')}
+            className="flex items-center gap-1 px-2 py-1 text-[11px] rounded-lg border border-border bg-surface-2 text-text-secondary hover:text-text-primary transition-luxury"
+          >
+            <FileCode className="h-3 w-3 text-accent-primary" /> PRD
+          </button>
+          <button
+            onClick={() => onSend?.('/research')}
+            className="flex items-center gap-1 px-2 py-1 text-[11px] rounded-lg border border-border bg-surface-2 text-text-secondary hover:text-text-primary transition-luxury"
+          >
+            <Sparkles className="h-3 w-3 text-accent-primary" /> Research
+          </button>
+          <button
+            onClick={() => onSend?.('/qa')}
+            className="flex items-center gap-1 px-2 py-1 text-[11px] rounded-lg border border-border bg-surface-2 text-text-secondary hover:text-text-primary transition-luxury"
+          >
+            <ShieldCheck className="h-3 w-3 text-accent-primary" /> Review
+          </button>
+        </div>
+      </div>
+
       {/* Slash Command Autocomplete Menu */}
       {showSlashMenu && (
         <div className="absolute bottom-full left-0 mb-2 w-full max-w-md rounded-2xl border border-border bg-surface-1 p-2 shadow-2xl z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
@@ -132,10 +200,10 @@ export const Composer: React.FC<ComposerProps> = ({ onSend }) => {
             onClick={handleSend}
             disabled={!text.trim()}
             size="sm"
-            className="h-9 px-3.5 rounded-xl font-semibold"
+            className="h-9 px-4 rounded-xl font-semibold"
           >
-            <span>Send</span>
-            <ArrowUp className="ml-1 h-3.5 w-3.5 stroke-[2]" />
+            <span>Execute</span>
+            <Play className="ml-1.5 h-3.5 w-3.5 fill-white stroke-none" />
           </Button>
         </div>
       </div>

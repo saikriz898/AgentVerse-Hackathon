@@ -12,6 +12,7 @@ export interface WorkflowNodeState {
   agentRole: string;
   title: string;
   status: 'queued' | 'running' | 'completed' | 'failed';
+  progressPercent: number; // 0 - 100%
   durationMs?: number;
   confidenceScore?: number;
   tokensUsed?: number;
@@ -41,6 +42,7 @@ export interface MemoryEntry {
 export interface Session {
   id: string;
   title: string;
+  category: 'PRD' | 'Research' | 'Planning' | 'Review' | 'General';
   time: string;
   isPinned: boolean;
   messages: ChatMessage[];
@@ -54,15 +56,18 @@ export interface AIWorkspaceState {
   activeSessionId: string;
   isThinking: boolean;
   streamingPhase: string | null;
-  streamingText: string;
+  isDeepResearch: boolean;
+  isMemorySyncEnabled: boolean;
 
   // Actions
   setActiveSessionId: (id: string) => void;
-  createNewSession: () => string;
+  createNewSession: (category?: Session['category']) => string;
   deleteSession: (id: string) => void;
   togglePinSession: (id: string) => void;
   renameSession: (id: string, newTitle: string) => void;
-  sendPrompt: (promptText: string) => Promise<void>;
+  toggleDeepResearch: () => void;
+  toggleMemorySync: () => void;
+  sendPrompt: (promptText: string, mode?: string) => Promise<void>;
 }
 
 const INITIAL_WORKFLOW_NODES: WorkflowNodeState[] = [
@@ -71,6 +76,7 @@ const INITIAL_WORKFLOW_NODES: WorkflowNodeState[] = [
     agentRole: 'Memory Agent',
     title: 'Context Vector Loaded',
     status: 'completed',
+    progressPercent: 100,
     durationMs: 140,
     confidenceScore: 0.98,
     tokensUsed: 1240,
@@ -81,6 +87,7 @@ const INITIAL_WORKFLOW_NODES: WorkflowNodeState[] = [
     agentRole: 'Research Agent',
     title: 'Multi-Source Deep Web Search',
     status: 'completed',
+    progressPercent: 100,
     durationMs: 2420,
     confidenceScore: 0.95,
     tokensUsed: 4850,
@@ -91,6 +98,7 @@ const INITIAL_WORKFLOW_NODES: WorkflowNodeState[] = [
     agentRole: 'Planning Agent',
     title: '10-Stage LangGraph Roadmap',
     status: 'completed',
+    progressPercent: 100,
     durationMs: 1180,
     tokensUsed: 3200,
     details: ['Subtask Breakdown Completed', 'Priority Tree Assigned', 'Milestone Generation Verified'],
@@ -100,6 +108,7 @@ const INITIAL_WORKFLOW_NODES: WorkflowNodeState[] = [
     agentRole: 'Execution Agent',
     title: 'Task Execution & Code Build',
     status: 'completed',
+    progressPercent: 100,
     durationMs: 1850,
     tokensUsed: 2900,
     details: ['FastAPI Microservice Interop Passed', 'Next.js App Router Compiled'],
@@ -109,6 +118,7 @@ const INITIAL_WORKFLOW_NODES: WorkflowNodeState[] = [
     agentRole: 'Finance Agent',
     title: 'Cost & Cloud Price Comparison',
     status: 'completed',
+    progressPercent: 100,
     costEst: '$124/mo',
     durationMs: 920,
     details: ['AWS Spot Instance Tariffs Calculated', '+24% Monthly Savings Forecasted'],
@@ -118,6 +128,7 @@ const INITIAL_WORKFLOW_NODES: WorkflowNodeState[] = [
     agentRole: 'Review Agent',
     title: 'QA & Security Scanner',
     status: 'completed',
+    progressPercent: 100,
     qaScore: 95,
     durationMs: 650,
     details: ['Score >= 80 QA Threshold Passed', '0 High Severity Vulnerabilities'],
@@ -127,6 +138,7 @@ const INITIAL_WORKFLOW_NODES: WorkflowNodeState[] = [
     agentRole: 'Communication Agent',
     title: 'Executive Deliverable Synthesis',
     status: 'completed',
+    progressPercent: 100,
     durationMs: 480,
     details: ['JSON transformed into executive markdown & PRD format'],
   },
@@ -135,6 +147,7 @@ const INITIAL_WORKFLOW_NODES: WorkflowNodeState[] = [
 const DEFAULT_SESSION: Session = {
   id: 'sess-1',
   title: 'LifeOS Architecture V1',
+  category: 'PRD',
   time: 'Just now',
   isPinned: true,
   messages: [
@@ -200,15 +213,20 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
   activeSessionId: 'sess-1',
   isThinking: false,
   streamingPhase: null,
-  streamingText: '',
+  isDeepResearch: true,
+  isMemorySyncEnabled: true,
 
   setActiveSessionId: (id) => set({ activeSessionId: id }),
 
-  createNewSession: () => {
+  toggleDeepResearch: () => set((state) => ({ isDeepResearch: !state.isDeepResearch })),
+  toggleMemorySync: () => set((state) => ({ isMemorySyncEnabled: !state.isMemorySyncEnabled })),
+
+  createNewSession: (category = 'General') => {
     const newId = `sess-${Date.now()}`;
     const newSession: Session = {
       id: newId,
       title: 'New Autonomous Session',
+      category,
       time: 'Just now',
       isPinned: false,
       messages: [
@@ -219,7 +237,7 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ],
-      workflowNodes: INITIAL_WORKFLOW_NODES.map((n) => ({ ...n, status: 'queued' })),
+      workflowNodes: INITIAL_WORKFLOW_NODES.map((n) => ({ ...n, status: 'queued', progressPercent: 0 })),
       artifacts: [],
       memoryEntries: [],
     };
@@ -253,7 +271,7 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
   },
 
   sendPrompt: async (promptText) => {
-    const { activeSessionId, sessions } = get();
+    const { activeSessionId } = get();
     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     const userMessage: ChatMessage = {
@@ -274,7 +292,9 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
               title: s.messages.length <= 1 ? promptText.slice(0, 24) + '...' : s.title,
               messages: [...s.messages, userMessage],
               workflowNodes: s.workflowNodes.map((node) =>
-                node.id === 'memory' ? { ...node, status: 'running' } : { ...node, status: 'queued' }
+                node.id === 'memory'
+                  ? { ...node, status: 'running', progressPercent: 65 }
+                  : { ...node, status: 'queued', progressPercent: 0 }
               ),
             }
           : s
@@ -291,9 +311,9 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
               ...s,
               workflowNodes: s.workflowNodes.map((node) =>
                 node.id === 'memory'
-                  ? { ...node, status: 'completed' }
+                  ? { ...node, status: 'completed', progressPercent: 100 }
                   : node.id === 'research'
-                  ? { ...node, status: 'running' }
+                  ? { ...node, status: 'running', progressPercent: 75 }
                   : node
               ),
             }
@@ -311,9 +331,9 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
               ...s,
               workflowNodes: s.workflowNodes.map((node) =>
                 node.id === 'research'
-                  ? { ...node, status: 'completed' }
+                  ? { ...node, status: 'completed', progressPercent: 100 }
                   : node.id === 'planning' || node.id === 'execution'
-                  ? { ...node, status: 'completed' }
+                  ? { ...node, status: 'completed', progressPercent: 100 }
                   : node
               ),
             }
@@ -379,7 +399,7 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
               ...s,
               messages: [...s.messages, aiMessage],
               artifacts: newArtifact ? [newArtifact, ...s.artifacts] : s.artifacts,
-              workflowNodes: s.workflowNodes.map((n) => ({ ...n, status: 'completed' })),
+              workflowNodes: s.workflowNodes.map((n) => ({ ...n, status: 'completed', progressPercent: 100 })),
               memoryEntries: [
                 {
                   id: `mem-${Date.now()}`,
