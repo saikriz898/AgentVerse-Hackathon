@@ -55,22 +55,22 @@ export const Sidebar: React.FC = () => {
   return (
     <aside
       className={cn(
-        'relative flex flex-col border-r border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-3 transition-luxury z-30 select-none',
+        'relative flex flex-col border-r border-border bg-surface p-3 transition-luxury z-30 select-none shrink-0',
         isSidebarOpen ? 'w-64' : 'w-20'
       )}
     >
       {/* Brand Header */}
-      <div className="flex h-14 items-center justify-between px-2">
+      <div className="flex h-14 items-center justify-between px-2 mb-2">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-[var(--radius)] bg-[hsl(var(--accent-primary))] text-white shadow-sm">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-primary text-white shadow-sm">
             <Sparkles className="h-5 w-5" />
           </div>
           {isSidebarOpen && (
             <div className="flex flex-col">
-              <span className="text-base font-bold tracking-tight text-[hsl(var(--text-primary))]">
+              <span className="text-base font-bold tracking-tight text-text-primary">
                 LifeOS
               </span>
-              <span className="text-[10px] font-medium uppercase tracking-wider text-[hsl(var(--text-muted))]">
+              <span className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
                 AI Operating System
               </span>
             </div>
@@ -79,7 +79,7 @@ export const Sidebar: React.FC = () => {
 
         <button
           onClick={toggleSidebar}
-          className="hidden md:flex h-8 w-8 items-center justify-center rounded-[var(--radius)] text-[hsl(var(--text-secondary))] hover:bg-[hsl(var(--surface-secondary))] transition-luxury"
+          className="hidden md:flex h-8 w-8 items-center justify-center rounded-xl text-text-secondary hover:bg-surface-secondary transition-luxury"
           title="Toggle Sidebar"
         >
           <ChevronLeft className={cn('h-4 w-4 transition-transform duration-200', !isSidebarOpen && 'rotate-180')} />
@@ -87,10 +87,10 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Navigation Group 1 */}
-      <div className="mt-4 flex-1 space-y-1 overflow-y-auto">
+      <div className="flex-1 space-y-1 overflow-y-auto">
         <div className="px-3 py-1">
           {isSidebarOpen && (
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--text-muted))]">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
               Core Platform
             </span>
           )}
@@ -103,16 +103,16 @@ export const Sidebar: React.FC = () => {
               key={item.id}
               onClick={() => setActiveNavId(item.id)}
               className={cn(
-                'group flex w-full items-center gap-3 rounded-[var(--radius)] px-3 py-2.5 text-sm font-medium transition-luxury',
+                'group flex w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-medium transition-luxury',
                 isActive
-                  ? 'bg-[hsl(var(--accent-light))] text-[hsl(var(--accent-primary))]'
-                  : 'text-[hsl(var(--text-secondary))] hover:bg-[hsl(var(--surface-secondary))] hover:text-[hsl(var(--text-primary))]'
+                  ? 'bg-accent-light text-accent-primary font-semibold'
+                  : 'text-text-secondary hover:bg-surface-secondary hover:text-text-primary'
               )}
             >
-              <Icon className={cn('h-5 w-5 shrink-0', isActive ? 'text-[hsl(var(--accent-primary))]' : 'text-[hsl(var(--text-muted))] group-hover:text-[hsl(var(--text-primary))]')} />
+              <Icon className={cn('h-5 w-5 shrink-0', isActive ? 'text-accent-primary' : 'text-text-muted group-hover:text-text-primary')} />
               {isSidebarOpen && <span className="truncate">{item.label}</span>}
               {isSidebarOpen && item.badge && (
-                <span className="ml-auto rounded-full bg-[hsl(var(--accent-primary))] px-2 py-0.5 text-[10px] font-bold text-white">
+                <span className="ml-auto rounded-full bg-accent-primary px-2 py-0.5 text-[10px] font-bold text-white">
                   {item.badge}
                 </span>
               )}
@@ -122,7 +122,7 @@ export const Sidebar: React.FC = () => {
 
         <div className="pt-4 px-3 py-1">
           {isSidebarOpen && (
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--text-muted))]">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
               System & Preferences
             </span>
           )}
@@ -135,13 +135,13 @@ export const Sidebar: React.FC = () => {
               key={item.id}
               onClick={() => setActiveNavId(item.id)}
               className={cn(
-                'group flex w-full items-center gap-3 rounded-[var(--radius)] px-3 py-2.5 text-sm font-medium transition-luxury',
+                'group flex w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-medium transition-luxury',
                 isActive
-                  ? 'bg-[hsl(var(--accent-light))] text-[hsl(var(--accent-primary))]'
-                  : 'text-[hsl(var(--text-secondary))] hover:bg-[hsl(var(--surface-secondary))] hover:text-[hsl(var(--text-primary))]'
+                  ? 'bg-accent-light text-accent-primary font-semibold'
+                  : 'text-text-secondary hover:bg-surface-secondary hover:text-text-primary'
               )}
             >
-              <Icon className={cn('h-5 w-5 shrink-0', isActive ? 'text-[hsl(var(--accent-primary))]' : 'text-[hsl(var(--text-muted))] group-hover:text-[hsl(var(--text-primary))]')} />
+              <Icon className={cn('h-5 w-5 shrink-0', isActive ? 'text-accent-primary' : 'text-text-muted group-hover:text-text-primary')} />
               {isSidebarOpen && <span className="truncate">{item.label}</span>}
             </button>
           );
@@ -149,15 +149,15 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Footer System Status */}
-      <div className="border-t border-[hsl(var(--border))] pt-3 mt-auto">
+      <div className="border-t border-border pt-3 mt-auto">
         <div className="flex items-center gap-3 px-2 py-1">
-          <div className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--success))] animate-pulse" />
+          <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
           {isSidebarOpen && (
             <div className="flex flex-col">
-              <span className="text-xs font-semibold text-[hsl(var(--text-primary))]">
+              <span className="text-xs font-semibold text-text-primary">
                 Fleet Status: Online
               </span>
-              <span className="text-[10px] text-[hsl(var(--text-muted))]">6 Agents Active</span>
+              <span className="text-[10px] text-text-muted">6 Agents Active</span>
             </div>
           )}
         </div>

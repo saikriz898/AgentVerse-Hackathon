@@ -13,18 +13,18 @@ export const Badge: React.FC<BadgeProps> = ({
   ...props
 }) => {
   const variantStyles = {
-    default: 'bg-[hsl(var(--surface-secondary))] text-[hsl(var(--text-secondary))]',
-    accent: 'bg-[hsl(var(--accent-light))] text-[hsl(var(--accent-primary))] font-semibold',
+    default: 'bg-surface-secondary text-text-secondary',
+    accent: 'bg-accent-light text-accent-primary font-semibold',
     success: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium',
     warning: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium',
     error: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 font-medium',
-    outline: 'border border-[hsl(var(--border))] text-[hsl(var(--text-secondary))]',
+    outline: 'border border-border text-text-secondary',
   };
 
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs transition-luxury select-none',
+        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs transition-luxury select-none font-medium',
         variantStyles[variant],
         className
       )}

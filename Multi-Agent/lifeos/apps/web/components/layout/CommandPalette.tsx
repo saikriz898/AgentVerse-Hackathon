@@ -38,21 +38,21 @@ export const CommandPalette: React.FC = () => {
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 pt-20 backdrop-blur-sm transition-luxury">
-      <div className="w-full max-w-xl rounded-[var(--radius)] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-4 shadow-2xl">
-        <div className="flex items-center gap-3 border-b border-[hsl(var(--border))] pb-3">
-          <Search className="h-5 w-5 text-[hsl(var(--text-muted))]" />
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 pt-20 backdrop-blur-sm transition-luxury px-4">
+      <div className="w-full max-w-xl rounded-2xl border border-border bg-surface p-4 shadow-2xl">
+        <div className="flex items-center gap-3 border-b border-border pb-3">
+          <Search className="h-5 w-5 text-text-muted" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Type a command or search workspace..."
-            className="w-full bg-transparent text-base text-[hsl(var(--text-primary))] placeholder:text-[hsl(var(--text-muted))] focus:outline-none"
+            className="w-full bg-transparent text-base text-text-primary placeholder:text-text-muted focus:outline-none"
             autoFocus
           />
           <button
             onClick={close}
-            className="flex h-7 w-7 items-center justify-center rounded-[var(--radius)] text-[hsl(var(--text-muted))] hover:bg-[hsl(var(--surface-secondary))]"
+            className="flex h-7 w-7 items-center justify-center rounded-xl text-text-muted hover:bg-surface-secondary"
           >
             <X className="h-4 w-4" />
           </button>
@@ -66,20 +66,20 @@ export const CommandPalette: React.FC = () => {
                 <button
                   key={idx}
                   onClick={close}
-                  className="flex w-full items-center justify-between rounded-[var(--radius)] px-3 py-2.5 text-left text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--accent-light))] hover:text-[hsl(var(--accent-primary))] transition-luxury"
+                  className="flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-sm text-text-primary hover:bg-accent-light hover:text-accent-primary transition-luxury"
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className="h-4 w-4 text-[hsl(var(--accent-primary))]" />
-                    <span>{cmd.label}</span>
+                    <Icon className="h-4 w-4 text-accent-primary" />
+                    <span className="font-medium">{cmd.label}</span>
                   </div>
-                  <span className="text-[10px] font-semibold text-[hsl(var(--text-muted))] uppercase">
+                  <span className="text-[10px] font-semibold text-text-muted uppercase">
                     {cmd.category}
                   </span>
                 </button>
               );
             })
           ) : (
-            <div className="py-6 text-center text-sm text-[hsl(var(--text-muted))]">
+            <div className="py-6 text-center text-sm text-text-muted">
               No commands found for "{query}"
             </div>
           )}
