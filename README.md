@@ -9,7 +9,7 @@
 [![LangChain](https://img.shields.io/badge/Orchestration-LangGraph-1C3C3C?logo=chainlink&logoColor=white)](https://langchain.com)
 [![PostgreSQL](https://img.shields.io/badge/Vector_DB-Neon%20PostgreSQL-4169E1?logo=postgresql&logoColor=white)](https://neon.tech)
 
-> **Tier-1 Production-Grade AI Platform for the AgentVerse Hackathon**  
+> **Enterprise Production-Grade AI Platform for the AgentVerse Hackathon**  
 > An enterprise-grade, dual-architecture AI ecosystem delivering both **Single-Agent** microservices (deep web research, project planning, cost estimation, central vector memory, automated QA review, document synthesis) and **Multi-Agent** collaborative orchestration fleets.
 
 ---
@@ -47,13 +47,13 @@ Per the **AgentVerse Hackathon** submission mandate, this repository contains bo
 │   ├── 📁 planning-agent/       (LangGraph 10-Stage Project Execution Agent)
 │   ├── 📁 research-agent/       (Multi-Source Deep Web Research Specialist)
 │   ├── 📁 review-agent/         (Automated Quality Assurance & Security Gatekeeper)
-│   └── 📄 README.md             (Master Tier-1 Single-Agent Specification)
+│   └── 📄 README.md             (Master Single-Agent Specification)
 │
 ├── 📁 Multi-Agent/              <-- Multi-Agent Orchestrations & Collaborative Fleets
 │   └── 📄 .gitkeep              (Placeholder ready for Multi-Agent Fleet expansion)
 │
 ├── 📄 .gitignore
-└── 📄 README.md                 (Root Tier-1 Master Hackathon README)
+└── 📄 README.md                 (Root Master Hackathon README)
 ```
 
 ---
