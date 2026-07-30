@@ -20,10 +20,14 @@ import {
   Database,
   FileCode,
   LineChart,
-  MessageSquare,
   ArrowUpRight,
   Layers,
   Activity,
+  Cpu,
+  FolderKanban,
+  CheckSquare,
+  BookOpen,
+  FileText,
 } from 'lucide-react';
 import { useUIStore } from '@/lib/stores/useUIStore';
 
@@ -35,58 +39,58 @@ export default function HomePage() {
     setMounted(true);
   }, []);
 
-  const SPECIALIST_AGENTS = [
+  const SYSTEM_CAPABILITIES = [
     {
-      role: 'Research Agent',
-      icon: Sparkles,
-      status: 'Ready',
-      tech: 'Gemini 2.5 Flash / Tavily API',
-      description: 'Multi-source deep web search, cross-source fact verification, and 0–100% confidence scoring.',
-      badgeVariant: 'accent' as const,
-      iconColor: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
-    },
-    {
-      role: 'Planning Agent',
+      title: 'Business Analysis',
       icon: FileCode,
-      status: 'Ready',
-      tech: 'LangGraph / LangChain / OpenAI',
-      description: '10-stage sequential project execution workflow, Jinja2 prompt engine, and risk analysis.',
+      status: 'Active',
+      tech: 'BRD / User Stories / Scope',
+      description: 'Requirement discovery, stakeholder alignment, user personas, and acceptance criteria.',
       badgeVariant: 'accent' as const,
       iconColor: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
     },
     {
-      role: 'Finance Agent',
-      icon: LineChart,
-      status: 'Ready',
-      tech: 'FastAPI / Recharts / Cloud Matrix',
-      description: '20+ cost parameter estimator, multi-cloud price comparison (AWS, GCP, Azure), and ROI break-even.',
+      title: 'Product Strategy',
+      icon: Sparkles,
+      status: 'Active',
+      tech: '10-Stage PRD / Feature Matrix',
+      description: 'Vision roadmap, MVP feature prioritization, milestone breakdown, and release planning.',
       badgeVariant: 'accent' as const,
-      iconColor: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+      iconColor: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
     },
     {
-      role: 'Memory Agent',
-      icon: Database,
-      status: 'RRF Synced',
-      tech: 'Neon PostgreSQL / pgvector / Gemini',
-      description: 'Reciprocal Rank Fusion hybrid search (768-dim embeddings + BM25) and 2D topology graph.',
+      title: 'System Architecture',
+      icon: Layers,
+      status: 'Active',
+      tech: 'Neon pgvector / OpenAPI v3',
+      description: 'Database schema design, system topology, API contracts, and security architecture.',
       badgeVariant: 'success' as const,
       iconColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
     },
     {
-      role: 'Review Agent',
+      title: 'Software Engineering',
+      icon: Cpu,
+      status: 'Active',
+      tech: 'Next.js 16 / FastAPI Interop',
+      description: 'App Router frontend, FastAPI microservice orchestrator, and RRF vector search integration.',
+      badgeVariant: 'accent' as const,
+      iconColor: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+    },
+    {
+      title: 'Quality Assurance',
       icon: ShieldCheck,
-      status: 'Score >= 80 Gate',
-      tech: 'Async SQLAlchemy / Security Scanner',
-      description: 'Automated QA score verification, SQLi/secret scanner, and 11-criteria quality evaluation.',
+      status: 'Gate >= 80',
+      tech: 'SQLi & Secret Scanner / QA Gate',
+      description: 'Automated 11-criteria quality verification, security audit, and zero-vulnerability gate.',
       badgeVariant: 'warning' as const,
       iconColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
     },
     {
-      role: 'Communication Agent',
-      icon: MessageSquare,
-      status: 'Ready',
-      tech: 'FastAPI / Offline Rule Engine',
-      description: 'Transforms technical JSON into 19 output document types tailored for 9 audience profiles.',
+      title: 'DevOps & Documentation',
+      icon: Activity,
+      status: 'Active',
+      tech: 'Docker / Helm / OpenAPI Wiki',
+      description: 'Container build specs, deployment plans, release notes, and executive summary reports.',
       badgeVariant: 'accent' as const,
       iconColor: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
     },
@@ -128,9 +132,9 @@ export default function HomePage() {
               <div className="flex items-center gap-3">
                 <Badge variant="accent" className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-accent-primary animate-pulse" />
-                  <span>Operating System Ready</span>
+                  <span>Unified Chief of Staff AI</span>
                 </Badge>
-                <Badge variant="outline">Quiet Luxury Theme</Badge>
+                <Badge variant="outline">AIDLC Operating System</Badge>
               </div>
 
               <div className="flex items-center gap-3">
@@ -142,29 +146,29 @@ export default function HomePage() {
                   size="sm"
                   onClick={() => useUIStore.getState().setActiveNavId('ai-workspace')}
                 >
-                  <Sparkles className="mr-2 h-4 w-4 stroke-[1.75]" /> Chief of Staff AI
+                  <Bot className="mr-2 h-4 w-4 stroke-[1.75]" /> Chief of Staff AI
                 </Button>
               </div>
             </div>
 
-            {/* Top 4 KPI Metric Cards */}
+            {/* Top 4 Executive Metrics Cards */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Card className="flex items-center justify-between bg-surface-1">
                 <div>
-                  <span className="text-xs font-semibold text-text-muted">System Architecture</span>
-                  <p className="mt-1.5 text-xl font-bold text-text-primary">Dual-Engine</p>
-                  <span className="text-[12px] text-text-secondary">Single-Agent + Multi-Agent</span>
+                  <span className="text-xs font-semibold text-text-muted">AI Architecture</span>
+                  <p className="mt-1.5 text-xl font-bold text-text-primary">Unified AI</p>
+                  <span className="text-[12px] text-text-secondary">Chief of Staff Orchestrator</span>
                 </div>
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-500/20 bg-blue-500/10 text-blue-400">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
                   <Bot className="h-5 w-5 stroke-[1.75]" />
                 </div>
               </Card>
 
               <Card className="flex items-center justify-between bg-surface-1">
                 <div>
-                  <span className="text-xs font-semibold text-text-muted">Specialist Fleet</span>
-                  <p className="mt-1.5 text-xl font-bold text-text-primary">6 AI Agents</p>
-                  <span className="text-[12px] text-emerald-500 font-semibold">All Microservices Configured</span>
+                  <span className="text-xs font-semibold text-text-muted">SDLC Capabilities</span>
+                  <p className="mt-1.5 text-xl font-bold text-text-primary">7 Modules</p>
+                  <span className="text-[12px] text-emerald-500 font-semibold">Dynamic Intent Routing</span>
                 </div>
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
                   <Activity className="h-5 w-5 stroke-[1.75]" />
@@ -175,7 +179,7 @@ export default function HomePage() {
                 <div>
                   <span className="text-xs font-semibold text-text-muted">QA Gate Threshold</span>
                   <p className="mt-1.5 text-xl font-bold text-text-primary">Score &ge; 80</p>
-                  <span className="text-[12px] text-amber-500 font-semibold">Review Agent Verification</span>
+                  <span className="text-[12px] text-amber-500 font-semibold">Security Audit Passed</span>
                 </div>
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/10 text-amber-400">
                   <ShieldCheck className="h-5 w-5 stroke-[1.75]" />
@@ -188,46 +192,46 @@ export default function HomePage() {
                   <p className="mt-1.5 text-xl font-bold text-text-primary">768-Dim RRF</p>
                   <span className="text-[12px] text-text-secondary">Neon PostgreSQL + BM25</span>
                 </div>
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-500/20 bg-blue-500/10 text-blue-400">
                   <Database className="h-5 w-5 stroke-[1.75]" />
                 </div>
               </Card>
             </div>
 
-            {/* 6 Specialist Agents Catalog Grid */}
+            {/* Internal Capabilities Catalog Grid */}
             <div>
               <div className="mb-4">
                 <h2 className="text-xl font-bold tracking-tight text-text-primary">
-                  Autonomous Specialist Agent Fleet Architecture
+                  Internal AIDLC System Capabilities
                 </h2>
                 <p className="mt-1 text-sm text-text-muted">
-                  Production architecture contracts prepared for all 6 single agents + Chief of Staff.
+                  The Chief of Staff AI orchestrates these specialized modules automatically based on prompt intent.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-                {SPECIALIST_AGENTS.map((agent, idx) => {
-                  const Icon = agent.icon;
+                {SYSTEM_CAPABILITIES.map((cap, idx) => {
+                  const Icon = cap.icon;
                   return (
                     <Card key={idx} className="flex flex-col justify-between bg-surface-1 p-6 hover:border-accent-primary/60 transition-luxury">
                       <div>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className={`flex h-10 w-10 items-center justify-center rounded-2xl border ${agent.iconColor}`}>
+                            <div className={`flex h-10 w-10 items-center justify-center rounded-2xl border ${cap.iconColor}`}>
                               <Icon className="h-5 w-5 stroke-[1.75]" />
                             </div>
-                            <span className="text-base font-bold text-text-primary">{agent.role}</span>
+                            <span className="text-base font-bold text-text-primary">{cap.title}</span>
                           </div>
-                          <Badge variant={agent.badgeVariant}>{agent.status}</Badge>
+                          <Badge variant={cap.badgeVariant}>{cap.status}</Badge>
                         </div>
 
                         <p className="mt-4 text-xs md:text-sm text-text-secondary leading-relaxed">
-                          {agent.description}
+                          {cap.description}
                         </p>
                       </div>
 
                       <div className="mt-6 pt-4 border-t border-border/60 flex items-center justify-between">
-                        <span className="text-xs font-mono text-text-muted">{agent.tech}</span>
+                        <span className="text-xs font-mono text-text-muted">{cap.tech}</span>
                         <ArrowUpRight className="h-4 w-4 text-text-muted stroke-[1.75]" />
                       </div>
                     </Card>
