@@ -20,6 +20,7 @@ import {
   Layers,
   Activity,
   Cpu,
+  Rocket,
 } from 'lucide-react';
 import { useAIWorkspaceStore } from '@/lib/stores/useAIWorkspaceStore';
 
@@ -48,12 +49,12 @@ export const AIWorkspaceView: React.FC = () => {
   }, [activeSession?.messages?.length, isThinking, streamingPhase]);
 
   const SUGGESTED_ACTIONS = [
+    { title: 'Build School ERP App', icon: Rocket, category: 'Full SDLC' },
     { title: 'Create PRD Spec', icon: FileCode, category: 'Planning' },
-    { title: 'Research Topic', icon: Sparkles, category: 'Research' },
-    { title: 'Generate Architecture', icon: Layers, category: 'Architecture' },
-    { title: 'Review Code', icon: ShieldCheck, category: 'Review' },
+    { title: 'Design Architecture', icon: Layers, category: 'Architecture' },
+    { title: 'Review Code & Security', icon: ShieldCheck, category: 'QA Gate' },
     { title: 'Estimate Infrastructure', icon: LineChart, category: 'Finance' },
-    { title: 'Create Roadmap', icon: Activity, category: 'Planning' },
+    { title: 'Deploy App to Production', icon: Activity, category: 'DevOps' },
   ];
 
   const hasMessages = activeSession?.messages && activeSession.messages.length > 0;
@@ -68,7 +69,7 @@ export const AIWorkspaceView: React.FC = () => {
           size="sm"
           className="w-full justify-start rounded-xl font-semibold"
         >
-          <Plus className="mr-2 h-4 w-4 stroke-[2]" /> New Execution Session
+          <Plus className="mr-2 h-4 w-4 stroke-[2]" /> New SDLC Session
         </Button>
 
         {/* Notion Folders & Session History */}
@@ -116,9 +117,9 @@ export const AIWorkspaceView: React.FC = () => {
           {/* Section 2: Execution Categories */}
           <div className="space-y-1 pt-2 border-t border-border/60">
             <h3 className="px-2 text-[11px] font-semibold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
-              <Folder className="h-3 w-3 text-accent-primary" /> Categories
+              <Folder className="h-3 w-3 text-accent-primary" /> SDLC Folders
             </h3>
-            {['PRD Specs', 'Research Sessions', 'Planning Roadmaps', 'QA Audits'].map((folder, idx) => (
+            {['Full SDLC Builds', 'PRD Specs', 'Architecture Schemas', 'QA Audits'].map((folder, idx) => (
               <button
                 key={idx}
                 onClick={() => createNewSession('PRD')}
@@ -186,7 +187,7 @@ export const AIWorkspaceView: React.FC = () => {
         </div>
       </aside>
 
-      {/* Center Execution Canvas (Max Width 900px, Centered) */}
+      {/* Center Execution Workspace (Max Width 900px, Centered) */}
       <main className="flex flex-1 flex-col justify-between overflow-hidden p-4 md:p-6">
         <div className="flex-1 overflow-y-auto space-y-6 max-w-[900px] w-full mx-auto pr-1">
           {/* Welcome Screen (When 0 Messages Exist) */}
@@ -201,7 +202,7 @@ export const AIWorkspaceView: React.FC = () => {
                   Good Afternoon
                 </h1>
                 <p className="text-base text-text-secondary">
-                  What would you like to accomplish with your Chief of Staff today?
+                  What startup app or SDLC workflow would you like to execute today?
                 </p>
               </div>
 
@@ -212,7 +213,7 @@ export const AIWorkspaceView: React.FC = () => {
                   return (
                     <button
                       key={idx}
-                      onClick={() => sendPrompt(action.title)}
+                      onClick={() => sendPrompt(action.title.startsWith('Build') ? `/build ${action.title}` : action.title)}
                       className="flex flex-col justify-between rounded-2xl border border-border bg-surface-1 p-4 text-left hover:border-accent-primary hover:bg-surface-2 transition-luxury shadow-xs group"
                     >
                       <div className="flex items-center justify-between">
@@ -274,7 +275,7 @@ export const AIWorkspaceView: React.FC = () => {
                   <div className="flex h-7 w-7 items-center justify-center rounded-2xl bg-accent-light text-accent-primary">
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   </div>
-                  <span>{streamingPhase || 'Chief of Staff executing autonomous workflows...'}</span>
+                  <span>{streamingPhase || 'Chief of Staff orchestrating 7 SDLC Departments...'}</span>
                 </div>
               )}
 
@@ -282,7 +283,7 @@ export const AIWorkspaceView: React.FC = () => {
             </div>
           )}
 
-          {/* Collapsible Workflow Panel (Hidden until execution starts) */}
+          {/* Collapsible SDLC Multi-Department Execution Panel */}
           <WorkflowExecutionPanel />
 
           {/* Dynamic Connected Artifacts Previews */}

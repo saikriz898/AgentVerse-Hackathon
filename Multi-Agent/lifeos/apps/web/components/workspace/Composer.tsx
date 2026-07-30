@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import {
   Paperclip,
   Mic,
-  ArrowUp,
   Command,
   FileText,
   Sparkles,
@@ -14,6 +13,8 @@ import {
   Play,
   FileCode,
   ShieldCheck,
+  Rocket,
+  Layers,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAIWorkspaceStore } from '@/lib/stores/useAIWorkspaceStore';
@@ -31,8 +32,9 @@ export const Composer: React.FC<ComposerProps> = ({ onSend }) => {
   const { isDeepResearch, isMemorySyncEnabled, toggleDeepResearch, toggleMemorySync } = useAIWorkspaceStore();
 
   const SLASH_COMMANDS = [
-    { command: '/prd', description: 'Generate a 10-stage PRD technical specification' },
-    { command: '/research', description: 'Execute multi-source deep web research with 0-100% confidence scoring' },
+    { command: '/build', description: 'Execute full Startup SDLC (Requirements -> Arch -> Code -> QA -> Deploy)' },
+    { command: '/prd', description: 'Generate a 10-stage PRD technical specification & feature roadmap' },
+    { command: '/arch', description: 'Design system topology, database schema & OpenAPI v3 contracts' },
     { command: '/cost', description: 'Estimate multi-cloud infrastructure cost & ROI break-even' },
     { command: '/qa', description: 'Run automated QA score verification and security scan' },
   ];
@@ -94,22 +96,28 @@ export const Composer: React.FC<ComposerProps> = ({ onSend }) => {
         {/* Action Button Chips */}
         <div className="ml-auto flex items-center gap-1.5">
           <button
+            onClick={() => onSend?.('/build Build School ERP')}
+            className="flex items-center gap-1 px-2 py-1 text-[11px] rounded-lg border border-border bg-surface-2 text-text-secondary hover:text-text-primary transition-luxury font-semibold"
+          >
+            <Rocket className="h-3 w-3 text-accent-primary" /> Build App
+          </button>
+          <button
             onClick={() => onSend?.('/prd')}
             className="flex items-center gap-1 px-2 py-1 text-[11px] rounded-lg border border-border bg-surface-2 text-text-secondary hover:text-text-primary transition-luxury"
           >
             <FileCode className="h-3 w-3 text-accent-primary" /> PRD
           </button>
           <button
-            onClick={() => onSend?.('/research')}
+            onClick={() => onSend?.('/arch')}
             className="flex items-center gap-1 px-2 py-1 text-[11px] rounded-lg border border-border bg-surface-2 text-text-secondary hover:text-text-primary transition-luxury"
           >
-            <Sparkles className="h-3 w-3 text-accent-primary" /> Research
+            <Layers className="h-3 w-3 text-accent-primary" /> Arch
           </button>
           <button
             onClick={() => onSend?.('/qa')}
             className="flex items-center gap-1 px-2 py-1 text-[11px] rounded-lg border border-border bg-surface-2 text-text-secondary hover:text-text-primary transition-luxury"
           >
-            <ShieldCheck className="h-3 w-3 text-accent-primary" /> Review
+            <ShieldCheck className="h-3 w-3 text-accent-primary" /> QA
           </button>
         </div>
       </div>
@@ -118,7 +126,7 @@ export const Composer: React.FC<ComposerProps> = ({ onSend }) => {
       {showSlashMenu && (
         <div className="absolute bottom-full left-0 mb-2 w-full max-w-md rounded-2xl border border-border bg-surface-1 p-2 shadow-2xl z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
           <div className="px-3 py-1.5 text-[11px] font-semibold text-text-muted border-b border-border/60">
-            Slash Commands
+            SDLC Slash Commands
           </div>
           <div className="space-y-1 mt-1">
             {SLASH_COMMANDS.map((sc, idx) => (
@@ -158,7 +166,7 @@ export const Composer: React.FC<ComposerProps> = ({ onSend }) => {
         value={text}
         onChange={handleTextChange}
         onKeyDown={handleKeyDown}
-        placeholder="Ask your Chief of Staff AI or type / for slash commands..."
+        placeholder="Ask your Chief of Staff AI to build an app or type / for slash commands..."
         rows={2}
         className="w-full resize-none bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none leading-relaxed"
       />

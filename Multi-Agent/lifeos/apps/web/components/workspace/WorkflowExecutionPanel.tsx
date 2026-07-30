@@ -14,6 +14,8 @@ import {
   MessageSquare,
   Activity,
   Cpu,
+  Layers,
+  Rocket,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
@@ -34,13 +36,13 @@ export const WorkflowExecutionPanel: React.FC = () => {
   }
 
   const ICON_MAP: Record<string, React.ElementType> = {
-    memory: Database,
-    research: Sparkles,
-    planning: FileCode,
-    execution: Activity,
-    finance: LineChart,
-    review: ShieldCheck,
-    communication: MessageSquare,
+    ba: FileCode,
+    product: Sparkles,
+    architecture: Layers,
+    pm: Activity,
+    engineering: Cpu,
+    qa: ShieldCheck,
+    deploy: Rocket,
   };
 
   return (
@@ -55,10 +57,10 @@ export const WorkflowExecutionPanel: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-text-primary">
-                {isThinking ? 'Workflow Executing...' : 'Workflow Pipeline Completed'}
+                {isThinking ? 'SDLC Pipeline Executing...' : 'SDLC Multi-Department Pipeline Synced'}
               </span>
               <Badge variant={isThinking ? 'accent' : 'success'}>
-                {isThinking ? 'In Progress' : '6 Specialist Agents Synced'}
+                {isThinking ? 'Executing Departments' : '7 SDLC Departments Completed'}
               </Badge>
             </div>
           </div>
@@ -72,9 +74,9 @@ export const WorkflowExecutionPanel: React.FC = () => {
         </div>
       </button>
 
-      {/* Accordion Body */}
+      {/* Accordion Body: 7 SDLC Departments */}
       {isOpen && (
-        <div className="p-4 border-t border-border/60 space-y-2.5 bg-surface-1">
+        <div className="p-4 border-t border-border/60 space-y-3 bg-surface-1">
           {workflowNodes.map((node) => {
             const Icon = ICON_MAP[node.id] || Activity;
             const isNodeExpanded = expandedNodeId === node.id;
@@ -90,7 +92,7 @@ export const WorkflowExecutionPanel: React.FC = () => {
                   node.status === 'queued' && 'border-border/60 bg-surface-2/40 opacity-60'
                 )}
               >
-                {/* Node Row */}
+                {/* Department Row Header */}
                 <button
                   onClick={() => setExpandedNodeId(isNodeExpanded ? null : node.id)}
                   className="flex w-full flex-col p-3 text-left transition-luxury space-y-2"
@@ -138,8 +140,29 @@ export const WorkflowExecutionPanel: React.FC = () => {
                   </div>
                 </button>
 
-                {/* Node Expand Details */}
-                {isNodeExpanded && node.details && (
+                {/* Assigned Department Work Checklist */}
+                <div className="px-3 pb-3 pt-1 space-y-1 border-t border-border/40 bg-surface-2/40">
+                  <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
+                    Assigned Work Checklist:
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 pt-1">
+                    {node.assignedTasks.map((task, idx) => (
+                      <div key={idx} className="flex items-center gap-1.5 text-xs text-text-secondary">
+                        {task.status === 'completed' ? (
+                          <span className="text-emerald-500 font-bold">✔</span>
+                        ) : task.status === 'in_progress' ? (
+                          <span className="text-accent-primary animate-pulse font-bold">⏳</span>
+                        ) : (
+                          <span className="text-text-muted">○</span>
+                        )}
+                        <span className="truncate">{task.title}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Expand Details */}
+                {isNodeExpanded && (
                   <div className="border-t border-border/40 p-3 bg-surface-2/60 space-y-2 text-xs text-text-secondary">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px]">
                       {node.confidenceScore && (
@@ -154,10 +177,10 @@ export const WorkflowExecutionPanel: React.FC = () => {
                           <span className="font-semibold text-text-primary">{node.tokensUsed}</span>
                         </div>
                       )}
-                      {node.costEst && (
+                      {node.durationMs && (
                         <div>
-                          <span className="text-text-muted">Cost:</span>{' '}
-                          <span className="font-semibold text-text-primary">{node.costEst}</span>
+                          <span className="text-text-muted">Duration:</span>{' '}
+                          <span className="font-semibold text-text-primary">{(node.durationMs / 1000).toFixed(2)}s</span>
                         </div>
                       )}
                       {node.qaScore && (
@@ -167,12 +190,6 @@ export const WorkflowExecutionPanel: React.FC = () => {
                         </div>
                       )}
                     </div>
-
-                    <ul className="list-disc list-inside space-y-1 text-[11px] text-text-muted pt-1">
-                      {node.details.map((detail, idx) => (
-                        <li key={idx}>{detail}</li>
-                      ))}
-                    </ul>
                   </div>
                 )}
               </div>
