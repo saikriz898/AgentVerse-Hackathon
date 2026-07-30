@@ -50,7 +50,9 @@ Per the **AgentVerse Hackathon** submission mandate, this repository contains bo
 │   └── 📄 README.md             (Master Single-Agent Specification)
 │
 ├── 📁 Multi-Agent/              <-- Multi-Agent Orchestrations & Collaborative Fleets
-│   └── 📄 .gitkeep              (Placeholder ready for Multi-Agent Fleet expansion)
+│   └── 📁 lifeos/               (LifeOS Multi-Agent Collaborative Fleet & Orchestrator)
+│       ├── 📄 README.md
+│       └── 📄 .gitkeep
 │
 ├── 📄 .gitignore
 └── 📄 README.md                 (Root Master Hackathon README)
