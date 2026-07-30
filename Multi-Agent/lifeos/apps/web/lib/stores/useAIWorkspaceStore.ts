@@ -49,6 +49,7 @@ export interface Session {
   workflowNodes: WorkflowNodeState[];
   artifacts: ArtifactData[];
   memoryEntries: MemoryEntry[];
+  isWorkflowActive?: boolean;
 }
 
 export interface AIWorkspaceState {
@@ -67,7 +68,7 @@ export interface AIWorkspaceState {
   renameSession: (id: string, newTitle: string) => void;
   toggleDeepResearch: () => void;
   toggleMemorySync: () => void;
-  sendPrompt: (promptText: string, mode?: string) => Promise<void>;
+  sendPrompt: (promptText: string) => Promise<void>;
 }
 
 const INITIAL_WORKFLOW_NODES: WorkflowNodeState[] = [
@@ -206,6 +207,7 @@ const DEFAULT_SESSION: Session = {
       timestamp: '12:41 PM',
     },
   ],
+  isWorkflowActive: true,
 };
 
 export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
@@ -229,17 +231,11 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
       category,
       time: 'Just now',
       isPinned: false,
-      messages: [
-        {
-          id: `msg-${Date.now()}`,
-          sender: 'chief_of_staff',
-          text: 'New workspace session initialized. What task or project would you like to execute?',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        },
-      ],
+      messages: [],
       workflowNodes: INITIAL_WORKFLOW_NODES.map((n) => ({ ...n, status: 'queued', progressPercent: 0 })),
       artifacts: [],
       memoryEntries: [],
+      isWorkflowActive: false,
     };
 
     set((state) => ({
@@ -281,16 +277,17 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
       timestamp,
     };
 
-    // 1. Instantly append user message & update title
+    // 1. Instantly append user message & activate workflow
     set((state) => ({
       isThinking: true,
-      streamingPhase: 'Memory Vector Loading...',
+      streamingPhase: 'Loading Memory & Vector Context...',
       sessions: state.sessions.map((s) =>
         s.id === activeSessionId
           ? {
               ...s,
-              title: s.messages.length <= 1 ? promptText.slice(0, 24) + '...' : s.title,
+              title: s.messages.length === 0 ? promptText.slice(0, 24) + '...' : s.title,
               messages: [...s.messages, userMessage],
+              isWorkflowActive: true,
               workflowNodes: s.workflowNodes.map((node) =>
                 node.id === 'memory'
                   ? { ...node, status: 'running', progressPercent: 65 }
@@ -301,10 +298,10 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
       ),
     }));
 
-    // Step 2: Research phase
+    // Step 2: Intent & Research phase
     await new Promise((r) => setTimeout(r, 600));
     set((state) => ({
-      streamingPhase: 'Research Agent Searching Web...',
+      streamingPhase: 'Understanding Intent & Executing Research...',
       sessions: state.sessions.map((s) =>
         s.id === activeSessionId
           ? {
@@ -324,7 +321,7 @@ export const useAIWorkspaceStore = create<AIWorkspaceState>((set, get) => ({
     // Step 3: Planning & Execution phase
     await new Promise((r) => setTimeout(r, 700));
     set((state) => ({
-      streamingPhase: 'Planning & Executing Workflows...',
+      streamingPhase: 'Planning & Executing Agent Workflows...',
       sessions: state.sessions.map((s) =>
         s.id === activeSessionId
           ? {
