@@ -20,11 +20,8 @@ import {
   Layers,
   Activity,
 } from 'lucide-react';
-import { useUIStore } from '@/lib/stores/useUIStore';
 
 export default function HomePage() {
-  const activeNavId = useUIStore((s) => s.activeNavId);
-
   const SPECIALIST_AGENTS = [
     {
       role: 'Research Agent',
@@ -83,32 +80,24 @@ export default function HomePage() {
 
       {/* Main Container */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* 2. Header Bar */}
+        {/* 2. Redesigned 76px Header Bar */}
         <Header />
 
         {/* 3. Main Workspace Area */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 pb-20 md:pb-8">
-          {/* Welcome Banner */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
-            <div>
-              <div className="flex items-center gap-2">
-                <Badge variant="accent">Production Foundation Initialized</Badge>
-                <Badge variant="outline">Quiet Luxury Design System</Badge>
-              </div>
-              <h1 className="mt-2 text-2xl font-bold tracking-tight text-text-primary md:text-3xl">
-                LifeOS Autonomous Workspace
-              </h1>
-              <p className="mt-1 text-sm text-text-secondary">
-                Active view: <span className="font-semibold capitalize text-accent-primary">{activeNavId}</span> — Chief of Staff AI Operating System Foundation.
-              </p>
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 pb-20 md:pb-8">
+          {/* Action Toolbar Banner */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/60 pb-6">
+            <div className="flex items-center gap-2">
+              <Badge variant="accent">Operating System Ready</Badge>
+              <Badge variant="outline">Quiet Luxury Theme</Badge>
             </div>
 
             <div className="flex items-center gap-3">
               <Button variant="outline" size="sm">
-                <Layers className="mr-2 h-4 w-4" /> System Topology
+                <Layers className="mr-2 h-4 w-4 stroke-[1.75]" /> System Topology
               </Button>
               <Button variant="primary" size="sm">
-                <Sparkles className="mr-2 h-4 w-4" /> Chief of Staff AI
+                <Sparkles className="mr-2 h-4 w-4 stroke-[1.75]" /> Chief of Staff AI
               </Button>
             </div>
           </div>
@@ -122,7 +111,7 @@ export default function HomePage() {
                 <span className="text-[11px] text-text-secondary">Single-Agent + Multi-Agent</span>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-light text-accent-primary">
-                <Bot className="h-5 w-5" />
+                <Bot className="h-5 w-5 stroke-[1.75]" />
               </div>
             </Card>
 
@@ -130,10 +119,10 @@ export default function HomePage() {
               <div>
                 <span className="text-xs font-semibold text-text-muted">Specialist Fleet</span>
                 <p className="mt-1 text-xl font-bold text-text-primary">6 AI Agents</p>
-                <span className="text-[11px] text-emerald-600 font-semibold">All Microservices Configured</span>
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">All Microservices Configured</span>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600">
-                <Activity className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <Activity className="h-5 w-5 stroke-[1.75]" />
               </div>
             </Card>
 
@@ -141,10 +130,10 @@ export default function HomePage() {
               <div>
                 <span className="text-xs font-semibold text-text-muted">QA Gate Threshold</span>
                 <p className="mt-1 text-xl font-bold text-text-primary">Score &ge; 80</p>
-                <span className="text-[11px] text-amber-600 font-semibold">Review Agent Verification</span>
+                <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">Review Agent Verification</span>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600">
-                <ShieldCheck className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <ShieldCheck className="h-5 w-5 stroke-[1.75]" />
               </div>
             </Card>
 
@@ -154,8 +143,8 @@ export default function HomePage() {
                 <p className="mt-1 text-xl font-bold text-text-primary">768-Dim RRF</p>
                 <span className="text-[11px] text-text-secondary">Neon PostgreSQL + BM25</span>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600">
-                <Database className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                <Database className="h-5 w-5 stroke-[1.75]" />
               </div>
             </Card>
           </div>
@@ -182,7 +171,7 @@ export default function HomePage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
                           <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-surface-secondary text-accent-primary">
-                            <Icon className="h-4 w-4" />
+                            <Icon className="h-4 w-4 stroke-[1.75]" />
                           </div>
                           <span className="text-sm font-bold text-text-primary">{agent.role}</span>
                         </div>
@@ -194,9 +183,9 @@ export default function HomePage() {
                       </p>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
+                    <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between">
                       <span className="text-[10px] font-mono text-text-muted">{agent.tech}</span>
-                      <ArrowUpRight className="h-4 w-4 text-text-muted" />
+                      <ArrowUpRight className="h-4 w-4 text-text-muted stroke-[1.75]" />
                     </div>
                   </Card>
                 );
