@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { RightContextPanel } from '@/components/layout/RightContextPanel';
@@ -28,7 +28,12 @@ import {
 import { useUIStore } from '@/lib/stores/useUIStore';
 
 export default function HomePage() {
+  const [mounted, setMounted] = useState(false);
   const activeNavId = useUIStore((s) => s.activeNavId);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const SPECIALIST_AGENTS = [
     {
@@ -86,6 +91,17 @@ export default function HomePage() {
       iconColor: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
     },
   ];
+
+  if (!mounted) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background text-text-primary">
+        <div className="flex items-center gap-2">
+          <span className="h-3 w-3 rounded-full bg-accent-primary animate-ping" />
+          <span className="text-sm font-semibold">Loading LifeOS Operating System...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background text-text-primary font-sans antialiased">

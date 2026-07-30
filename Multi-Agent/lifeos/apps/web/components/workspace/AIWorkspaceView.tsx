@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { WorkflowExecutionPanel } from '@/components/workspace/WorkflowExecutionPanel';
 import { Composer } from '@/components/workspace/Composer';
 import { ArtifactViewer } from '@/components/workspace/ArtifactViewer';
@@ -14,74 +14,26 @@ import {
   LineChart,
   ShieldCheck,
   Loader2,
-  MessageSquare,
+  Trash2,
+  Pin,
 } from 'lucide-react';
-
-export interface ChatMessage {
-  id: string;
-  sender: 'user' | 'chief_of_staff';
-  text: string;
-  timestamp: string;
-}
-
-export interface Session {
-  id: string;
-  title: string;
-  time: string;
-  messages: ChatMessage[];
-  artifact?: {
-    title: string;
-    type: 'markdown' | 'json' | 'code' | 'pdf';
-    content: string;
-  };
-}
+import { useAIWorkspaceStore } from '@/lib/stores/useAIWorkspaceStore';
 
 export const AIWorkspaceView: React.FC = () => {
-  const [sessions, setSessions] = useState<Session[]>([
-    {
-      id: 'sess-1',
-      title: 'LifeOS Architecture V1',
-      time: 'Just now',
-      messages: [
-        {
-          id: 'msg-1',
-          sender: 'chief_of_staff',
-          text: 'Good afternoon. I am your Chief of Staff AI. System context and vector memory partitions have been loaded. How can we assist you today?',
-          timestamp: '12:42 PM',
-        },
-        {
-          id: 'msg-2',
-          sender: 'chief_of_staff',
-          text: 'Our 6 specialist agents (Research, Planning, Execution, Finance, Review, Communication) are online and ready to execute deep workflows.',
-          timestamp: '12:43 PM',
-        },
-      ],
-      artifact: {
-        title: 'lifeos-architecture-spec.json',
-        type: 'json',
-        content: `{
-  "system": "LifeOS Multi-Agent Platform",
-  "orchestrator": "Chief of Staff AI",
-  "specialist_agents": [
-    "Research Agent",
-    "Planning Agent",
-    "Finance Agent",
-    "Memory Agent",
-    "Review Agent",
-    "Communication Agent"
-  ],
-  "qa_approval_threshold": 80,
-  "vector_search": "Reciprocal Rank Fusion (768-dim + BM25)"
-}`,
-      },
-    },
-  ]);
-
-  const [activeSessionId, setActiveSessionId] = useState<string>('sess-1');
-  const [isThinking, setIsThinking] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const {
+    sessions,
+    activeSessionId,
+    isThinking,
+    streamingPhase,
+    setActiveSessionId,
+    createNewSession,
+    deleteSession,
+    togglePinSession,
+    sendPrompt,
+  } = useAIWorkspaceStore();
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[0];
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -89,7 +41,7 @@ export const AIWorkspaceView: React.FC = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [activeSession.messages, isThinking]);
+  }, [activeSession?.messages?.length, isThinking, streamingPhase]);
 
   const QUICK_PROMPTS = [
     { title: 'Generate PRD Spec', icon: FileCode, category: 'Planning' },
@@ -98,96 +50,12 @@ export const AIWorkspaceView: React.FC = () => {
     { title: 'Run QA & Security Scan', icon: ShieldCheck, category: 'Review' },
   ];
 
-  const handleCreateNewSession = () => {
-    const newId = `sess-${Date.now()}`;
-    const newSession: Session = {
-      id: newId,
-      title: 'New Autonomous Session',
-      time: 'Just now',
-      messages: [
-        {
-          id: `msg-${Date.now()}`,
-          sender: 'chief_of_staff',
-          text: 'New workspace session initialized. What task or project would you like to execute?',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        },
-      ],
-    };
-    setSessions((prev) => [newSession, ...prev]);
-    setActiveSessionId(newId);
-  };
-
-  const handleSendMessage = (text: string) => {
-    const userMsg: ChatMessage = {
-      id: `msg-${Date.now()}`,
-      sender: 'user',
-      text,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-
-    // Update active session messages
-    setSessions((prev) =>
-      prev.map((s) =>
-        s.id === activeSessionId
-          ? {
-              ...s,
-              title: s.messages.length <= 1 ? text.slice(0, 24) + '...' : s.title,
-              messages: [...s.messages, userMsg],
-            }
-          : s
-      )
-    );
-
-    setIsThinking(true);
-
-    setTimeout(() => {
-      setIsThinking(false);
-
-      let responseText = `Understood. Orchestrating specialist agents to execute: "${text}". Memory vector partitions synced and pipeline active.`;
-      let newArtifact = activeSession.artifact;
-
-      if (text.toLowerCase().includes('/prd') || text.toLowerCase().includes('prd')) {
-        responseText = `Planning Agent executed 10-stage PRD breakdown. Technical specification generated successfully.`;
-        newArtifact = {
-          title: 'lifeos-prd-specification.md',
-          type: 'markdown',
-          content: `# LifeOS PRD Technical Specification\n\n## 1. System Overview\nDual-Engine platform combining Chief of Staff orchestrator with 6 specialist AI agent microservices.\n\n## 2. QA Gate Threshold\nScore >= 80 verified by Review Agent prior to production deploy.`,
-        };
-      } else if (text.toLowerCase().includes('/research') || text.toLowerCase().includes('research')) {
-        responseText = `Research Agent completed multi-source web search with Tavily API. Cross-verified 14 references with 95% confidence.`;
-      } else if (text.toLowerCase().includes('/cost') || text.toLowerCase().includes('cost')) {
-        responseText = `Finance Agent computed multi-cloud price matrix. Estimated monthly AWS spot cost: $124/mo (24% ROI saving).`;
-      } else if (text.toLowerCase().includes('/qa') || text.toLowerCase().includes('qa')) {
-        responseText = `Review Agent completed automated security scan. QA Score: 94/100 (0 High Severity Vulnerabilities).`;
-      }
-
-      const aiMsg: ChatMessage = {
-        id: `msg-${Date.now() + 1}`,
-        sender: 'chief_of_staff',
-        text: responseText,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      };
-
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === activeSessionId
-            ? {
-                ...s,
-                messages: [...s.messages, aiMsg],
-                artifact: newArtifact,
-              }
-            : s
-        )
-      );
-    }, 1100);
-  };
-
   return (
     <div className="flex h-full w-full overflow-hidden bg-background">
-      {/* Notion-Style Left Conversation & Prompt Panel (250px) */}
+      {/* Notion-Style Left Conversation & Session Panel (250px) */}
       <aside className="hidden lg:flex w-64 flex-col border-r border-border/80 bg-sidebar p-3 space-y-4 select-none shrink-0 overflow-y-auto">
         <Button
-          onClick={handleCreateNewSession}
+          onClick={() => createNewSession()}
           variant="primary"
           size="sm"
           className="w-full justify-start rounded-xl font-semibold"
@@ -195,27 +63,57 @@ export const AIWorkspaceView: React.FC = () => {
           <Plus className="mr-2 h-4 w-4 stroke-[2]" /> New Session
         </Button>
 
-        {/* Pinned Sessions */}
+        {/* Workspace Sessions List */}
         <div className="space-y-1">
           <h3 className="px-2 text-[11px] font-semibold uppercase tracking-wider text-text-muted">
-            Workspace Sessions
+            Workspace Sessions ({sessions.length})
           </h3>
           {sessions.map((sess) => (
-            <button
+            <div
               key={sess.id}
-              onClick={() => setActiveSessionId(sess.id)}
-              className={`flex w-full items-center justify-between rounded-xl px-2.5 py-2 text-xs font-medium transition-luxury ${
+              className={`group flex items-center justify-between rounded-xl px-2.5 py-2 text-xs font-medium transition-luxury ${
                 activeSessionId === sess.id
                   ? 'bg-accent-light text-accent-primary font-bold'
                   : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'
               }`}
             >
-              <div className="flex items-center gap-2 truncate">
-                <Bookmark className="h-3.5 w-3.5 text-accent-primary shrink-0" />
+              <button
+                onClick={() => setActiveSessionId(sess.id)}
+                className="flex items-center gap-2 truncate flex-1 text-left"
+              >
+                <Bookmark
+                  className={`h-3.5 w-3.5 shrink-0 ${
+                    sess.isPinned ? 'text-accent-primary fill-accent-primary' : 'text-text-muted'
+                  }`}
+                />
                 <span className="truncate">{sess.title}</span>
+              </button>
+
+              <div className="hidden group-hover:flex items-center gap-1 shrink-0">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePinSession(sess.id);
+                  }}
+                  className="p-1 hover:text-accent-primary rounded-lg"
+                  title="Pin Session"
+                >
+                  <Pin className="h-3 w-3" />
+                </button>
+                {sessions.length > 1 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteSession(sess.id);
+                    }}
+                    className="p-1 hover:text-rose-500 rounded-lg"
+                    title="Delete Session"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                )}
               </div>
-              <span className="text-[10px] text-text-muted">{sess.time}</span>
-            </button>
+            </div>
           ))}
         </div>
 
@@ -229,7 +127,7 @@ export const AIWorkspaceView: React.FC = () => {
             return (
               <button
                 key={idx}
-                onClick={() => handleSendMessage(prompt.title)}
+                onClick={() => sendPrompt(prompt.title)}
                 className="flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-text-secondary hover:bg-accent-light hover:text-accent-primary transition-luxury text-left"
               >
                 <Icon className="h-4 w-4 text-accent-primary shrink-0 stroke-[1.75]" />
@@ -250,7 +148,7 @@ export const AIWorkspaceView: React.FC = () => {
               return (
                 <button
                   key={idx}
-                  onClick={() => handleSendMessage(prompt.title)}
+                  onClick={() => sendPrompt(prompt.title)}
                   className="flex flex-col justify-between rounded-2xl border border-border bg-surface-1 p-3.5 text-left hover:border-accent-primary transition-luxury shadow-xs"
                 >
                   <div className="flex items-center justify-between">
@@ -265,15 +163,15 @@ export const AIWorkspaceView: React.FC = () => {
             })}
           </div>
 
-          {/* Natural Grouped Conversation Canvas (No Cards, Natural Flow) */}
+          {/* Quiet Luxury Conversation Canvas */}
           <div className="space-y-6 py-2">
-            {activeSession.messages.map((msg, idx) => {
+            {activeSession?.messages?.map((msg, idx) => {
               const isPrevSameSender = idx > 0 && activeSession.messages[idx - 1].sender === msg.sender;
 
               if (msg.sender === 'user') {
                 return (
                   <div key={msg.id} className="flex justify-end my-3">
-                    <div className="max-w-[70%] rounded-2xl bg-accent-primary text-white px-4 py-2.5 text-sm font-medium shadow-sm leading-relaxed">
+                    <div className="max-w-[70%] rounded-2xl bg-surface-2 text-text-primary border border-border/80 px-4 py-2.5 text-sm font-medium shadow-xs leading-relaxed">
                       {msg.text}
                     </div>
                   </div>
@@ -311,7 +209,7 @@ export const AIWorkspaceView: React.FC = () => {
                 <div className="flex h-7 w-7 items-center justify-center rounded-2xl bg-accent-light text-accent-primary">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 </div>
-                <span>Chief of Staff thinking & orchestrating specialist agents...</span>
+                <span>{streamingPhase || 'Chief of Staff thinking & orchestrating specialist agents...'}</span>
               </div>
             )}
 
@@ -321,19 +219,20 @@ export const AIWorkspaceView: React.FC = () => {
           {/* Live Multi-Agent Execution Panel */}
           <WorkflowExecutionPanel />
 
-          {/* Dynamic Artifact Preview */}
-          {activeSession.artifact && (
+          {/* Dynamic Connected Artifacts Previews */}
+          {activeSession?.artifacts?.map((artifact) => (
             <ArtifactViewer
-              title={activeSession.artifact.title}
-              type={activeSession.artifact.type}
-              content={activeSession.artifact.content}
+              key={artifact.id}
+              title={artifact.title}
+              type={artifact.type}
+              content={artifact.content}
             />
-          )}
+          ))}
         </div>
 
         {/* Bottom Composer */}
         <div className="pt-4 shrink-0">
-          <Composer onSend={handleSendMessage} />
+          <Composer onSend={(text) => sendPrompt(text)} />
         </div>
       </main>
     </div>

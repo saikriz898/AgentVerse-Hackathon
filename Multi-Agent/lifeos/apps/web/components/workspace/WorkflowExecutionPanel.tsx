@@ -17,88 +17,24 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
-
-export interface WorkflowNode {
-  id: string;
-  agentRole: string;
-  title: string;
-  status: 'completed' | 'in_progress' | 'pending';
-  durationMs?: number;
-  confidenceScore?: number;
-  tokensUsed?: number;
-  costEst?: string;
-  qaScore?: number;
-  details?: string[];
-  icon: React.ElementType;
-}
+import { useAIWorkspaceStore } from '@/lib/stores/useAIWorkspaceStore';
 
 export const WorkflowExecutionPanel: React.FC = () => {
-  const [expandedNodeId, setExpandedNodeId] = useState<string | null>('planning');
+  const [expandedNodeId, setExpandedNodeId] = useState<string | null>(null);
 
-  const WORKFLOW_NODES: WorkflowNode[] = [
-    {
-      id: 'memory',
-      agentRole: 'Memory Agent',
-      title: 'Context Vector Loaded',
-      status: 'completed',
-      durationMs: 140,
-      confidenceScore: 0.98,
-      tokensUsed: 1240,
-      details: ['RRF Hybrid Search (Vector + BM25)', '768-dim Embedding Synced', '3 Pinned Documents Retrieved'],
-      icon: Database,
-    },
-    {
-      id: 'research',
-      agentRole: 'Research Agent',
-      title: 'Multi-Source Deep Web Search',
-      status: 'completed',
-      durationMs: 2420,
-      confidenceScore: 0.95,
-      tokensUsed: 4850,
-      details: ['Tavily Search API (3x Retry)', 'Cross-Source Fact Checker Passed', '14 Primary References Scraped'],
-      icon: Sparkles,
-    },
-    {
-      id: 'planning',
-      agentRole: 'Planning Agent',
-      title: '10-Stage LangGraph Roadmap',
-      status: 'in_progress',
-      durationMs: 1180,
-      tokensUsed: 3200,
-      details: ['Subtask Breakdown Completed', 'Priority Tree Assigned', 'Milestone Generation in Progress...'],
-      icon: FileCode,
-    },
-    {
-      id: 'execution',
-      agentRole: 'Execution Agent',
-      title: 'Task Execution & Code Build',
-      status: 'pending',
-      icon: Activity,
-    },
-    {
-      id: 'finance',
-      agentRole: 'Finance Agent',
-      title: 'Cost & Cloud Price Comparison',
-      status: 'pending',
-      costEst: '$124/mo',
-      icon: LineChart,
-    },
-    {
-      id: 'review',
-      agentRole: 'Review Agent',
-      title: 'QA & Security Scanner',
-      status: 'pending',
-      qaScore: 95,
-      icon: ShieldCheck,
-    },
-    {
-      id: 'communication',
-      agentRole: 'Communication Agent',
-      title: 'Executive Deliverable Synthesis',
-      status: 'pending',
-      icon: MessageSquare,
-    },
-  ];
+  const { sessions, activeSessionId, isThinking } = useAIWorkspaceStore();
+  const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[0];
+  const workflowNodes = activeSession?.workflowNodes || [];
+
+  const ICON_MAP: Record<string, React.ElementType> = {
+    memory: Database,
+    research: Sparkles,
+    planning: FileCode,
+    execution: Activity,
+    finance: LineChart,
+    review: ShieldCheck,
+    communication: MessageSquare,
+  };
 
   return (
     <div className="w-full rounded-2xl border border-border bg-surface-1 p-4 shadow-sm transition-luxury">
@@ -113,16 +49,25 @@ export const WorkflowExecutionPanel: React.FC = () => {
             <p className="text-[11px] text-text-muted">Autonomous 7-Agent Execution Pipeline</p>
           </div>
         </div>
-        <Badge variant="accent" className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-accent-primary animate-pulse" />
-          <span>Pipeline Active</span>
+
+        <Badge
+          variant={isThinking ? 'accent' : 'success'}
+          className="flex items-center gap-1.5"
+        >
+          <span
+            className={cn(
+              'h-2 w-2 rounded-full',
+              isThinking ? 'bg-accent-primary animate-ping' : 'bg-emerald-500'
+            )}
+          />
+          <span>{isThinking ? 'Executing Pipeline' : 'Pipeline Synced'}</span>
         </Badge>
       </div>
 
-      {/* Nodes Horizon Bar */}
+      {/* Nodes List */}
       <div className="space-y-2">
-        {WORKFLOW_NODES.map((node) => {
-          const Icon = node.icon;
+        {workflowNodes.map((node) => {
+          const Icon = ICON_MAP[node.id] || Activity;
           const isExpanded = expandedNodeId === node.id;
 
           return (
@@ -131,11 +76,11 @@ export const WorkflowExecutionPanel: React.FC = () => {
               className={cn(
                 'rounded-xl border transition-all duration-200 overflow-hidden',
                 node.status === 'completed' && 'border-emerald-500/20 bg-emerald-500/5',
-                node.status === 'in_progress' && 'border-accent-primary/40 bg-accent-light/10',
-                node.status === 'pending' && 'border-border/60 bg-surface-2/40 opacity-60'
+                node.status === 'running' && 'border-accent-primary/40 bg-accent-light/10 shadow-xs',
+                node.status === 'queued' && 'border-border/60 bg-surface-2/40 opacity-60'
               )}
             >
-              {/* Node Header Row */}
+              {/* Header Row */}
               <button
                 onClick={() => setExpandedNodeId(isExpanded ? null : node.id)}
                 className="flex w-full items-center justify-between p-3 text-left transition-luxury"
@@ -144,10 +89,10 @@ export const WorkflowExecutionPanel: React.FC = () => {
                   {node.status === 'completed' && (
                     <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
                   )}
-                  {node.status === 'in_progress' && (
+                  {node.status === 'running' && (
                     <Clock className="h-4 w-4 text-accent-primary animate-spin shrink-0" />
                   )}
-                  {node.status === 'pending' && (
+                  {node.status === 'queued' && (
                     <Circle className="h-4 w-4 text-text-muted shrink-0" />
                   )}
 
