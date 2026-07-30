@@ -1,111 +1,131 @@
-# LifeOS Communication Agent 📧💬
+# 📧 Communication Agent — Presentation Layer & Format Synthesis Engine
 
-> **Production-ready AI-powered Communication Agent** for the **LifeOS Multi-Agent Ecosystem**.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/badge/Python-3.11%20%7C%203.12-3776AB?logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/Frontend-React%20%7C%20Vite%20%7C%20TypeScript-61DAFB?logo=react&logoColor=white)](https://react.dev)
+[![Google Gemini](https://img.shields.io/badge/AI_Core-Gemini%202.5%20Flash-4285F4?logo=google&logoColor=white)](https://ai.google.dev)
 
-The **Communication Agent** serves as the final presentation layer of the LifeOS ecosystem. It transforms raw, technical JSON outputs from every other agent (*Chief of Staff*, *Research Agent*, *Planning Agent*, *Memory Agent*, *Execution Agent*, *Review Agent*) into clear, professional, human-readable communication tailored to specific output destinations (*Manager*, *Executive*, *Client*, *Professor*, *Developer*, *Team*, *Stakeholders*, *Project Lead*, *User*).
-
----
-
-## 🌟 Primary Purpose & Capabilities
-
-- 🤖 **Gemini 2.5 Flash Powered**: Uses Gemini AI for intelligent summarization, executive formatting, tone adaptation, and documentation structuring.
-- 🛡️ **Zero Fabrication / Zero Hallucination**: Enforces strict principles to preserve 100% technical accuracy, metrics, code, and validated facts without inventing details.
-- ⚠️ **Missing Information Transparency**: Automatically detects incomplete input JSON structures and flags missing fields explicitly.
-- 🔄 **100% Offline Fallback Engine**: Built with a deterministic rule-based template engine so documents generate seamlessly even when offline or without an API key.
-- 📊 **20 Core Responsibilities & 19 Supported Output Types**:
-  - Executive Summaries, Project Summaries, Research Summaries, Planning Summaries, Execution Summaries, Review Summaries.
-  - Meeting Notes, Professional Emails, Markdown Reports, HTML Reports, Status Updates, Progress Reports.
-  - Release Notes, API Documentation, Technical Documentation, Presentation Notes, Blog Style Reports, Weekly Reports, Daily Standups.
-- 🎨 **Modern Interactive Web Studio**: React + Vite + TypeScript dashboard featuring side-by-side JSON editor, live rendered Markdown, HTML iframe preview, simulated Email view, slide presentation mode, history analytics, and exports.
+> **Presentation Layer & Executive Deliverable Synthesizer**  
+> Converts complex, technical JSON payloads from every single agent in the ecosystem (*Research*, *Planning*, *Finance*, *Memory*, *Review*, *Chief of Staff*) into audience-adapted, human-friendly deliverables tailored for 9 target roles across 19 document formats.
 
 ---
 
-## 🏗️ Architecture & Structure
-
-```
-comunication-agent/
-├── backend/                  # FastAPI Python server
-│   ├── app/
-│   │   ├── ai/               # Gemini 2.5 Flash SDK & REST client & Prompts
-│   │   ├── api/              # REST Endpoints (/transform, /history, /export, /templates, /stats)
-│   │   ├── core/             # Configuration & Logger
-│   │   ├── database/         # Async SQLAlchemy & SQLite/PostgreSQL setup
-│   │   ├── models/           # DB Schema (CommunicationRecord, CommunicationTemplate)
-│   │   ├── schemas/          # Pydantic request/response validation schemas
-│   │   ├── services/         # Transformation engine, Fallback engine, Export service
-│   │   └── main.py
-│   ├── tests/                # Pytest automated test suite
-│   ├── .env.example
-│   └── requirements.txt
-├── frontend/                 # React + Vite + TypeScript Glassmorphism Dashboard
-│   ├── src/
-│   │   ├── components/       # Studio, OutputPreview, HistoryViewer, StatsOverview, PresetTemplates, Navbar
-│   │   ├── services/         # Axios API Client
-│   │   └── types/            # TypeScript interfaces
-│   └── package.json
-├── docker-compose.yml
-└── README.md
-```
+## 📋 Table of Contents
+- [🌟 Role in the Single-Agent Ecosystem](#-role-in-the-single-agent-ecosystem)
+- [🔄 Inter-Agent Integration Matrix](#-inter-agent-integration-matrix)
+- [✨ Key Features & Capabilities](#-key-features--capabilities)
+- [🎯 9 Audience Profiles & 19 Document Types](#-9-audience-profiles--19-document-types)
+- [🛠️ Technology Stack](#️-technology-stack)
+- [🔌 REST API Endpoints Directory](#-rest-api-endpoints-directory)
+- [🚀 Local Setup & Quick Start](#-local-setup--quick-start)
+- [🧪 Automated Testing](#-automated-testing)
 
 ---
 
-## 🚀 Getting Started
+## 🌟 Role in the Single-Agent Ecosystem
 
-### 1. Backend Server Setup
+The **Communication Agent** functions as the final synthesis and formatting hub of the LifeOS platform. Technical outputs generated by other single agents (such as raw JSON research arrays, cost estimations, 10-stage LangGraph execution trees, or vector search context windows) are incomprehensible to non-technical stakeholders.
 
-```bash
-cd comunication-agent/backend
+The Communication Agent ingests these structured JSON payloads, applies zero-hallucination transformation rules, flags missing parameters, and renders polished deliverables formatted specifically for Executives, Clients, Managers, Developers, and Investors.
 
-# Create python virtual environment & install requirements
+---
+
+## 🔄 Inter-Agent Integration Matrix
+
+| Agent Name | Ingestion Payload Source | Communication Agent Transformation Output |
+| :--- | :--- | :--- |
+| **🔬 Research Agent** | Research JSON (`summary`, `confidence`, `references`) | Executive Summary, Research Report, Blog-Style Summary, Markdown Article. |
+| **📅 Planning Agent** | Execution Plan JSON (`tasks`, `milestones`, `roadmap`) | Project Roadmap Report, Sprint Task List, Weekly Progress Update, Gantt Notes. |
+| **💰 Finance Agent** | Financial Estimate JSON (`totalCost`, `cloudComparisons`) | Financial Pitch Deck Notes, Budget Summary, Investor Report, Cost Matrix. |
+| **🧠 Memory Agent** | Context Vector Stream (`/api/v1/context`) | Consolidated Knowledge Brief, Onboarding Guide, System Overview. |
+| **🛡️ Review Agent** | QA Report JSON (`quality_score`, `issues`, `status`) | Executive Audit Report, QA Clearance Certificate, Compliance Overview. |
+
+---
+
+## ✨ Key Features & Capabilities
+
+- 🤖 **Gemini 2.5 Flash Transformation Engine**: Contextual summarization, executive formatting, tone adaptation, and document structuring.
+- 🛡️ **Zero Fabrication Rules**: Enforces strict principles to preserve 100% technical accuracy, metrics, code snippets, and verified facts without inventing data.
+- ⚠️ **Missing Information Flagger**: Automatically detects missing JSON keys and explicitly highlights missing context under `⚠️ Missing Information`.
+- 🔄 **100% Offline Rule Fallback**: Built with a deterministic template engine so documents generate seamlessly even when offline or without an API key.
+- 🎨 **Glassmorphism Web Studio**: React + Vite + TypeScript dashboard featuring side-by-side JSON editor, live rendered Markdown, HTML iframe preview, simulated Email view, slide presentation mode, history analytics, and multi-format exports.
+
+---
+
+## 🎯 9 Audience Profiles & 19 Document Types
+
+### 👥 9 Audience Profiles:
+`Executive`, `Manager`, `Client`, `Professor`, `Developer`, `Team`, `Stakeholders`, `Project Lead`, `User`.
+
+### 📄 19 Document Output Types:
+1. Executive Summary &nbsp; 2. Project Summary &nbsp; 3. Research Summary &nbsp; 4. Planning Summary  
+5. Execution Summary &nbsp; 6. Review Summary &nbsp; 7. Meeting Notes &nbsp; 8. Professional Email  
+9. Markdown Report &nbsp; 10. HTML Report &nbsp; 11. Status Update &nbsp; 12. Progress Report  
+13. Release Notes &nbsp; 14. API Documentation &nbsp; 15. Technical Documentation  
+16. Presentation Notes &nbsp; 17. Blog Style Report &nbsp; 18. Weekly Report &nbsp; 19. Daily Standup
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technology |
+| :--- | :--- |
+| **Backend API** | Python 3.11/3.12, FastAPI, Uvicorn, Pydantic v2 |
+| **AI Integration** | Google Gemini 2.5 Flash SDK & REST Client |
+| **Database & ORM** | Async SQLAlchemy, SQLite / PostgreSQL |
+| **Frontend UI** | React 18, Vite, TypeScript, Tailwind CSS, Lucide Icons |
+| **Testing** | Pytest, Pytest-Asyncio |
+
+---
+
+## 🔌 REST API Endpoints Directory
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/v1/communication/transform` | Core endpoint converting technical JSON into structured document |
+| `GET` | `/api/v1/communication/history` | List paginated transformation history records |
+| `GET` | `/api/v1/communication/history/{id}` | Fetch single transformation entry by UUID |
+| `POST` | `/api/v1/communication/export` | Export generated document (`.md`, `.html`, `.txt`, `.json`) |
+| `GET` | `/api/v1/communication/templates` | List pre-built document templates |
+| `GET` | `/api/v1/communication/stats` | Fetch usage analytics & transformation metrics |
+| `GET` | `/api/v1/health` | Service health & Gemini LLM connection status check |
+
+---
+
+## 🚀 Local Setup & Quick Start
+
+### 1. Launch Backend Server (Port 8004)
+```powershell
+cd Single-Agent/comunication-agent/backend
 python -m venv venv
-venv\Scripts\activate
+.\venv\Scripts\activate
 pip install -r requirements.txt
-
-# (Optional) Add your Gemini API key to .env
-# GEMINI_API_KEY=your_key_here
-
-# Run backend server (Port 8004)
 uvicorn app.main:app --reload --port 8004
 ```
 
-### 2. Frontend Dashboard Setup
-
-```bash
-cd comunication-agent/frontend
-
-# Install dependencies
+### 2. Launch Frontend Studio (Port 5173)
+```powershell
+cd Single-Agent/comunication-agent/frontend
 npm install
-
-# Start Vite dev server (Port 5173)
 npm run dev
 ```
+- **Web Studio**: `http://localhost:5173`
+- **Backend API**: `http://localhost:8004`
+- **Interactive OpenAPI Docs**: `http://localhost:8004/docs`
 
 ---
 
 ## 🧪 Automated Testing
 
-Run the backend test suite:
-
-```bash
-cd comunication-agent/backend
-pytest
+Run the pytest test suite:
+```powershell
+cd Single-Agent/comunication-agent/backend
+python -m pytest tests/ -v
 ```
 
 ---
 
-## 📡 API Endpoints
-
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `POST` | `/api/v1/communication/transform` | Core endpoint converting technical JSON into structured documents |
-| `GET` | `/api/v1/communication/history` | Paginated list of past transformation logs |
-| `GET` | `/api/v1/communication/history/{id}` | Single transformation log detail |
-| `POST` | `/api/v1/communication/export` | Export document to `.md`, `.html`, `.txt`, `.json` |
-| `GET` | `/api/v1/communication/templates` | List pre-built and custom document templates |
-| `GET` | `/api/v1/communication/stats` | Analytics summary metrics |
-| `GET` | `/api/v1/health` | Health & LLM status check |
-
----
-
-## 📄 License
-Part of the **LifeOS Multi-Agent Ecosystem**.
+## 📄 License & Credits
+- **Part of**: LifeOS Autonomous Agent Suite  
+- **Repository**: [`https://github.com/saikriz898/AgentVerse-Hackathon.git`](https://github.com/saikriz898/AgentVerse-Hackathon.git)
