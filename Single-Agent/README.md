@@ -396,34 +396,51 @@ cd single-agent/comunication-agent && docker-compose up --build -d
 
 ## 🧪 Automated Testing Suite
 
-To run tests for individual microservices, create/activate a virtual environment or run via `python -m pytest`:
+Comprehensive testing suite instructions for **all 6 Single Agents**:
 
 > **PowerShell Note**: In Windows PowerShell 5.1, use `;` instead of `&&` to chain commands, or run commands on separate lines.
 
 ### 1. Communication Agent Tests
 ```powershell
-cd single-agent/comunication-agent/backend
+cd Single-Agent/comunication-agent/backend
 python -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
 python -m pytest tests/ -v
 ```
 
-### 2. Planning Agent Tests
+### 2. Finance Agent Tests
 ```powershell
-cd single-agent/planning-agent
+cd Single-Agent/finance-agent/backend
+pip install -r requirements.txt
 python -m pytest tests/ -v
 ```
 
-### 3. Research Agent Tests
+### 3. Memory Agent Tests
 ```powershell
-cd single-agent/research-agent/backend
+cd Single-Agent/Memory-Agent
+npm install
+npm test
+```
+
+### 4. Planning Agent Tests
+```powershell
+cd Single-Agent/planning-agent
+pip install -r requirements.txt
 python -m pytest tests/ -v
 ```
 
-### 4. Review Agent Tests
+### 5. Research Agent Tests
 ```powershell
-cd single-agent/review-agent/backend
+cd Single-Agent/research-agent/backend
+pip install -r requirements.txt
+python -m pytest tests/ -v
+```
+
+### 6. Review Agent Tests
+```powershell
+cd Single-Agent/review-agent/backend
+pip install -r requirements.txt
 python -m pytest tests/ -v
 ```
 

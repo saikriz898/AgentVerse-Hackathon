@@ -99,6 +99,32 @@ docker-compose up --build -d
 
 ---
 
+## 🧪 Automated Testing Suite (All 6 Single Agents)
+
+Execute automated test suites for **all 6 Single Agents**:
+
+```powershell
+# 1. Communication Agent Tests
+cd Single-Agent/comunication-agent/backend ; python -m pytest tests/ -v
+
+# 2. Finance Agent Tests
+cd Single-Agent/finance-agent/backend ; python -m pytest tests/ -v
+
+# 3. Memory Agent Tests
+cd Single-Agent/Memory-Agent ; npm test
+
+# 4. Planning Agent Tests
+cd Single-Agent/planning-agent ; python -m pytest tests/ -v
+
+# 5. Research Agent Tests
+cd Single-Agent/research-agent/backend ; python -m pytest tests/ -v
+
+# 6. Review Agent Tests
+cd Single-Agent/review-agent/backend ; python -m pytest tests/ -v
+```
+
+---
+
 ## 📄 Repository License & Credits
 
 - **Repository**: [`https://github.com/saikriz898/AgentVerse-Hackathon.git`](https://github.com/saikriz898/AgentVerse-Hackathon.git)
