@@ -4,45 +4,47 @@
 
 @layer base {
   :root {
-    --background: 60 9% 98%;          /* #FAFAF8 */
-    --surface: 0 0% 100%;             /* #FFFFFF */
-    --surface-secondary: 60 5% 95%;   /* #F4F4F2 */
-    --border: 20 6% 90%;              /* #E7E5E4 */
+    --background: 60 4% 97%;           /* #F8F8F7 */
+    --sidebar: 0 0% 100%;              /* #FFFFFF */
+    --surface: 0 0% 100%;              /* #FFFFFF */
+    --surface-secondary: 220 14% 96%;  /* #F3F4F6 */
+    --border: 220 13% 91%;             /* #E5E7EB */
     
-    --text-primary: 221 39% 11%;      /* #111827 */
-    --text-secondary: 215 16% 34%;    /* #4B5563 */
-    --text-muted: 218 11% 65%;        /* #9CA3AF */
+    --text-primary: 221 39% 11%;       /* #111827 */
+    --text-secondary: 215 16% 34%;     /* #4B5563 */
+    --text-muted: 218 11% 65%;         /* #9CA3AF */
 
-    --accent-primary: 168 56% 28%;    /* #1F6F5F */
-    --accent-hover: 168 56% 22%;      /* #19594D */
-    --accent-pressed: 168 56% 18%;    /* #15463D */
-    --accent-light: 164 43% 93%;      /* #E7F5F1 */
+    --accent-primary: 243 75% 59%;     /* #4F46E5 (Indigo) */
+    --accent-hover: 244 57% 50%;       /* #4338CA */
+    --accent-pressed: 244 55% 41%;     /* #3730A3 */
+    --accent-light: 226 100% 97%;      /* #EEF2FF */
 
-    --success: 153 40% 30%;           /* #2D6A4F */
-    --warning: 38 76% 43%;            /* #C0841A */
-    --error: 6 60% 46%;               /* #C0392B */
+    --success: 175 77% 26%;            /* #0F766E */
+    --warning: 41 93% 40%;             /* #CA8A04 */
+    --error: 0 72% 51%;                /* #DC2626 */
 
-    --radius: 18px;                   /* Fixed Quiet Luxury 18px radius */
+    --radius: 20px;                    /* 20px Corner Radius */
   }
 
   .dark {
-    --background: 220 18% 7%;         /* #0F1115 */
-    --surface: 222 13% 10%;           /* #17191E */
-    --surface-secondary: 218 15% 14%; /* #1F232A */
-    --border: 213 14% 20%;            /* #2D333B */
+    --background: 240 10% 4%;          /* #09090B */
+    --sidebar: 220 9% 7%;              /* #111214 */
+    --surface: 240 6% 10%;             /* #18181B */
+    --surface-secondary: 225 6% 13%;   /* #202124 */
+    --border: 220 9% 20%;              /* #2E3137 */
 
-    --text-primary: 210 40% 98%;      /* #F8FAFC */
-    --text-secondary: 215 25% 84%;    /* #CBD5E1 */
-    --text-muted: 215 16% 65%;        /* #94A3B8 */
+    --text-primary: 0 0% 98%;          /* #FAFAFA */
+    --text-secondary: 240 5% 65%;      /* #A1A1AA */
+    --text-muted: 240 5% 46%;          /* #71717A */
 
-    --accent-primary: 161 35% 47%;    /* #4FA38A */
-    --accent-hover: 161 36% 38%;      /* #3F8671 */
-    --accent-pressed: 161 36% 31%;    /* #336B5A */
-    --accent-light: 161 28% 15%;      /* #19342C */
+    --accent-primary: 239 84% 67%;     /* #6366F1 */
+    --accent-hover: 243 75% 59%;       /* #4F46E5 */
+    --accent-pressed: 244 57% 50%;     /* #4338CA */
+    --accent-light: 239 84% 15%;       /* rgba(99, 102, 241, 0.12) */
 
-    --success: 122 39% 49%;
-    --warning: 32 95% 44%;
-    --error: 0 65% 51%;
+    --success: 175 70% 40%;
+    --warning: 41 90% 50%;
+    --error: 0 70% 60%;
   }
 
   body {
@@ -55,14 +57,14 @@
   }
 }
 
-/* Quiet Luxury Micro-Transitions (180ms - 280ms cubic-bezier) */
+/* Micro-Transitions (220ms ease) */
 .transition-luxury {
   transition-property: color, background-color, border-color, box-shadow, transform, opacity;
-  transition-duration: 230ms;
+  transition-duration: 220ms;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Quiet Luxury Custom Scrollbar */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

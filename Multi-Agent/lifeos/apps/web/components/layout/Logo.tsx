@@ -16,21 +16,21 @@ export const Logo: React.FC<{ className?: string; size?: number }> = ({
       {/* Precision Geometric Architectural Monogram Logo for LifeOS */}
       <path
         d="M16 3L27.25 9.5V22.5L16 29L4.75 22.5V9.5L16 3Z"
-        stroke="#1F6F5F"
+        className="stroke-accent-primary"
         strokeWidth="2.2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M16 3V15.5M27.25 9.5L16 15.5M4.75 9.5L16 15.5"
-        stroke="#1F6F5F"
+        className="stroke-accent-primary"
         strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M16 15.5V29M27.25 22.5L16 15.5M4.75 22.5L16 15.5"
-        stroke="#4FA38A"
+        className="stroke-accent-primary opacity-60"
         strokeWidth="1.4"
         strokeLinecap="round"
         strokeLinejoin="round"

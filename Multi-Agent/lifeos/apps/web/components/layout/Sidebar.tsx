@@ -19,7 +19,6 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Activity,
-  ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/lib/stores/useUIStore';
@@ -97,7 +96,7 @@ export const Sidebar: React.FC = () => {
   return (
     <aside
       className={cn(
-        'relative flex flex-col border-r border-border bg-[#13161B] p-4 transition-all duration-200 cubic-bezier(0.16,1,0.3,1) z-30 select-none shrink-0 h-screen',
+        'relative flex flex-col border-r border-border bg-sidebar p-4 transition-all duration-200 cubic-bezier(0.16,1,0.3,1) z-30 select-none shrink-0 h-screen',
         isSidebarOpen ? 'w-[312px]' : 'w-[72px] items-center px-2'
       )}
     >
@@ -105,16 +104,16 @@ export const Sidebar: React.FC = () => {
       <div className="flex h-[76px] w-full items-center justify-between border-b border-border/60 pb-3 mb-4 shrink-0">
         <div className={cn('flex items-center gap-3', !isSidebarOpen && 'w-full justify-center')}>
           {/* Logo Badge Container */}
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-[#17191E] shadow-sm transition-transform duration-200 hover:scale-105 shrink-0">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-surface-secondary shadow-sm transition-transform duration-200 hover:scale-105 shrink-0">
             <Logo size={24} />
           </div>
 
           {isSidebarOpen && (
             <div className="flex flex-col">
-              <span className="text-base font-bold tracking-tight text-[#F8FAFC]">
+              <span className="text-base font-bold tracking-tight text-text-primary">
                 LifeOS
               </span>
-              <span className="text-[11px] font-medium text-[#9AA4B2]">
+              <span className="text-[11px] font-medium text-text-secondary">
                 Personal Operating System
               </span>
             </div>
@@ -124,7 +123,7 @@ export const Sidebar: React.FC = () => {
         {isSidebarOpen && (
           <button
             onClick={toggleSidebar}
-            className="flex h-8 w-8 items-center justify-center rounded-xl text-[#9AA4B2] hover:bg-[#17191E] hover:text-[#F8FAFC] transition-all duration-200"
+            className="flex h-8 w-8 items-center justify-center rounded-xl text-text-secondary hover:bg-surface-secondary hover:text-text-primary transition-all duration-200"
             title="Collapse Sidebar (⌘[)"
           >
             <PanelLeftClose className="h-4 w-4 stroke-[1.75]" />
@@ -136,7 +135,7 @@ export const Sidebar: React.FC = () => {
       {!isSidebarOpen && (
         <button
           onClick={toggleSidebar}
-          className="mb-4 flex h-8 w-8 items-center justify-center rounded-xl text-[#9AA4B2] hover:bg-[#17191E] hover:text-[#F8FAFC] transition-all duration-200"
+          className="mb-4 flex h-8 w-8 items-center justify-center rounded-xl text-text-secondary hover:bg-surface-secondary hover:text-text-primary transition-all duration-200"
           title="Expand Sidebar (⌘[)"
         >
           <PanelLeftOpen className="h-4 w-4 stroke-[1.75]" />
@@ -148,7 +147,7 @@ export const Sidebar: React.FC = () => {
         {NAVIGATION_GROUPS.map((group, groupIdx) => (
           <div key={groupIdx} className="space-y-1.5">
             {isSidebarOpen ? (
-              <h3 className="px-3.5 text-[11px] font-semibold tracking-wider text-[#6B7280]">
+              <h3 className="px-3.5 text-[11px] font-semibold tracking-wider text-text-muted">
                 {group.title}
               </h3>
             ) : (
@@ -167,23 +166,23 @@ export const Sidebar: React.FC = () => {
                       className={cn(
                         'relative flex h-[48px] w-full items-center rounded-2xl px-3.5 text-sm font-medium transition-all duration-200',
                         isActive
-                          ? 'bg-[rgba(31,111,95,0.15)] text-[#F8FAFC] font-semibold'
-                          : 'text-[#9AA4B2] hover:bg-[#17191E] hover:text-[#F8FAFC]',
+                          ? 'bg-accent-light text-text-primary font-semibold'
+                          : 'text-text-secondary hover:bg-surface-secondary hover:text-text-primary',
                         !isSidebarOpen && 'justify-center px-0'
                       )}
                     >
                       {/* 4px Left Accent Indicator Bar */}
                       {isActive && (
-                        <div className="absolute left-0 top-2 bottom-2 w-[4px] rounded-r-full bg-[#1F6F5F] shadow-[0_0_8px_rgba(31,111,95,0.6)]" />
+                        <div className="absolute left-0 top-2 bottom-2 w-[4px] rounded-r-full bg-accent-primary shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
                       )}
 
-                      {/* Icon (20px, Stroke 1.75, Opacity 70% inactive, 100% active) */}
+                      {/* Icon (20px, Stroke 1.75) */}
                       <Icon
                         className={cn(
                           'h-[20px] w-[20px] stroke-[1.75] shrink-0 transition-opacity duration-200',
                           isActive
-                            ? 'text-[#1F6F5F] opacity-100'
-                            : 'text-[#9AA4B2] opacity-70 group-hover:opacity-100 group-hover:text-[#F8FAFC]'
+                            ? 'text-accent-primary opacity-100'
+                            : 'text-text-secondary opacity-70 group-hover:opacity-100 group-hover:text-text-primary'
                         )}
                       />
 
@@ -195,7 +194,7 @@ export const Sidebar: React.FC = () => {
 
                     {/* Collapsed Mode Floating Tooltip */}
                     {!isSidebarOpen && (
-                      <div className="absolute left-[76px] top-1/2 -translate-y-1/2 z-50 hidden group-hover:flex items-center gap-1.5 rounded-xl border border-[#262B33] bg-[#17191E] px-3 py-1.5 text-xs font-semibold text-[#F8FAFC] shadow-xl whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-150">
+                      <div className="absolute left-[76px] top-1/2 -translate-y-1/2 z-50 hidden group-hover:flex items-center gap-1.5 rounded-xl border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text-primary shadow-xl whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-150">
                         <span>{item.label}</span>
                       </div>
                     )}
@@ -210,27 +209,27 @@ export const Sidebar: React.FC = () => {
       {/* 3. System Status Card (Bottom) */}
       <div className="mt-auto pt-4 border-t border-border/60 w-full shrink-0">
         {isSidebarOpen ? (
-          <div className="rounded-2xl border border-[#262B33] bg-[#17191E] p-3.5 space-y-2">
+          <div className="rounded-2xl border border-border bg-surface-secondary p-3.5 space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-bold text-[#F8FAFC]">System Healthy</span>
+                <span className="text-xs font-bold text-text-primary">System Healthy</span>
               </div>
-              <Activity className="h-3.5 w-3.5 text-[#6B7280]" />
+              <Activity className="h-3.5 w-3.5 text-text-muted" />
             </div>
 
-            <div className="space-y-1 text-[11px] text-[#9AA4B2] pt-1">
+            <div className="space-y-1 text-[11px] text-text-secondary pt-1">
               <div className="flex items-center justify-between">
                 <span>Chief of Staff</span>
-                <span className="text-emerald-400 font-semibold">Online</span>
+                <span className="text-emerald-500 font-semibold">Online</span>
               </div>
               <div className="flex items-center justify-between">
                 <span>Specialist Fleet</span>
-                <span className="text-[#F8FAFC] font-medium">6 Agents Ready</span>
+                <span className="text-text-primary font-medium">6 Agents Ready</span>
               </div>
             </div>
 
-            <div className="pt-1 text-[10px] text-[#6B7280] border-t border-[#262B33]/60 flex items-center justify-between">
+            <div className="pt-1 text-[10px] text-text-muted border-t border-border/60 flex items-center justify-between">
               <span>Last Sync</span>
               <span>2 sec ago</span>
             </div>
