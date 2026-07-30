@@ -10,6 +10,15 @@ import { ProjectsView } from '@/components/workspace/ProjectsView';
 import { TasksView } from '@/components/workspace/TasksView';
 import { KnowledgeView } from '@/components/workspace/KnowledgeView';
 import { DocumentsView } from '@/components/workspace/DocumentsView';
+import { AutomationView } from '@/components/workspace/AutomationView';
+import { AnalyticsView } from '@/components/workspace/AnalyticsView';
+import { AIModelsView } from '@/components/workspace/AIModelsView';
+import { SearchView } from '@/components/workspace/SearchView';
+import { IntegrationsView } from '@/components/workspace/IntegrationsView';
+import { NotificationsView } from '@/components/workspace/NotificationsView';
+import { SettingsView } from '@/components/workspace/SettingsView';
+import { ProfileView } from '@/components/workspace/ProfileView';
+
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -19,15 +28,10 @@ import {
   ShieldCheck,
   Database,
   FileCode,
-  LineChart,
   ArrowUpRight,
   Layers,
   Activity,
   Cpu,
-  FolderKanban,
-  CheckSquare,
-  BookOpen,
-  FileText,
 } from 'lucide-react';
 import { useUIStore } from '@/lib/stores/useUIStore';
 
@@ -117,15 +121,22 @@ export default function HomePage() {
         {/* 2. Redesigned 76px Header Bar */}
         <Header />
 
-        {/* 3. Main Workspace Body Area (Dynamic Render) */}
+        {/* 3. Main Workspace Body Area (Dynamic Render Across All 14 Modules) */}
         {activeNavId === 'ai-workspace' && <AIWorkspaceView />}
         {activeNavId === 'projects' && <ProjectsView />}
         {activeNavId === 'tasks' && <TasksView />}
         {activeNavId === 'knowledge' && <KnowledgeView />}
         {activeNavId === 'documents' && <DocumentsView />}
+        {activeNavId === 'automation' && <AutomationView />}
+        {activeNavId === 'analytics' && <AnalyticsView />}
+        {activeNavId === 'ai-models' && <AIModelsView />}
+        {activeNavId === 'search' && <SearchView />}
+        {activeNavId === 'integrations' && <IntegrationsView />}
+        {activeNavId === 'notifications' && <NotificationsView />}
+        {activeNavId === 'settings' && <SettingsView />}
+        {activeNavId === 'profile' && <ProfileView />}
 
-        {(activeNavId === 'dashboard' ||
-          !['ai-workspace', 'projects', 'tasks', 'knowledge', 'documents'].includes(activeNavId)) && (
+        {activeNavId === 'dashboard' && (
           <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 pb-20 md:pb-8">
             {/* Action Toolbar Banner */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/60 pb-5">
