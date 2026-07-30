@@ -18,6 +18,7 @@ import {
   aiProviderManager,
   queueManager,
   websocketGateway,
+  integrationService,
 } from './src/services';
 import { orchestrator } from './orchestrator';
 
@@ -148,6 +149,27 @@ app.get('/api/v1/projects', (req, res) => {
   res.json({ projects: projectManager.getProjects(), tasks: projectManager.getTasks() });
 });
 
+app.post('/api/v1/projects', (req, res) => {
+  try {
+    const newProject = projectManager.createProject(req.body);
+    auditService.logEvent('PROJECT', 'CREATE', 'Operator', newProject.id, 'SUCCESS', { name: newProject.name });
+    res.json(newProject);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v1/tasks', (req, res) => {
+  try {
+    const newTask = projectManager.createTask(req.body);
+    auditService.logEvent('TASK', 'CREATE', 'Operator', newTask.id, 'SUCCESS', { title: newTask.title });
+    res.json(newTask);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // 7. Memory & RRF Vector Store
 app.get('/api/v1/memory', async (req, res) => {
   const query = (req.query.q as string) || '';
@@ -191,6 +213,66 @@ app.get('/api/v1/ai/providers', (req, res) => {
 app.get('/api/v1/queues', (req, res) => {
   res.json({ queues: queueManager.getQueueStatuses(), jobs: queueManager.getRecentJobs() });
 });
+
+// 15. Integrations & External Webhooks
+app.get('/api/v1/integrations', (req, res) => {
+  res.json({ integrations: integrationService.getIntegrations() });
+});
+
+app.post('/api/v1/integrations/:id/connect', (req, res) => {
+  try {
+    const updated = integrationService.connectIntegration(req.params.id, req.body);
+    auditService.logEvent('INTEGRATION', 'CONNECT', 'Operator', req.params.id, 'SUCCESS');
+    res.json(updated);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v1/integrations/:id/configure', (req, res) => {
+  try {
+    const updated = integrationService.configureIntegration(req.params.id, req.body);
+    auditService.logEvent('INTEGRATION', 'CONFIGURE', 'Operator', req.params.id, 'SUCCESS');
+    res.json(updated);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v1/integrations/:id/disconnect', (req, res) => {
+  try {
+    const updated = integrationService.disconnectIntegration(req.params.id);
+    auditService.logEvent('INTEGRATION', 'DISCONNECT', 'Operator', req.params.id, 'SUCCESS');
+    res.json(updated);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v1/integrations/sync', (req, res) => {
+  try {
+    const integrations = integrationService.syncAll();
+    auditService.logEvent('INTEGRATION', 'SYNC_ALL', 'Operator', 'System', 'SUCCESS');
+    res.json({ integrations });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v1/webhooks/custom', (req, res) => {
+  try {
+    const { name, category, webhookUrl } = req.body;
+    if (!name || !webhookUrl) {
+      return res.status(400).json({ error: 'Name and Webhook URL are required' });
+    }
+    const created = integrationService.addCustomWebhook(name, category || 'Webhook', webhookUrl);
+    auditService.logEvent('INTEGRATION', 'CREATE_WEBHOOK', 'Operator', created.id, 'SUCCESS');
+    res.json(created);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 const server = createServer(app);
 

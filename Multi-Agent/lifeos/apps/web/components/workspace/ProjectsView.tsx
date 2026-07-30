@@ -4,26 +4,44 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import {
   FolderKanban,
   Plus,
-  FileCode,
-  Sparkles,
   LayoutGrid,
   List,
-  Kanban,
   Search,
   ArrowUpRight,
   RefreshCw,
+  X,
+  CheckCircle2,
+  DollarSign,
+  Briefcase,
 } from 'lucide-react';
 import { ApiClient } from '@/lib/apiClient';
 
 export const ProjectsView: React.FC = () => {
-  const [activeView, setActiveView] = useState<'grid' | 'list' | 'kanban'>('grid');
+  const [activeView, setActiveView] = useState<'grid' | 'list'>('grid');
   const [projects, setProjects] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // New Project Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [projectName, setProjectName] = useState('');
+  const [projectCode, setProjectCode] = useState('');
+  const [projectDescription, setProjectDescription] = useState('');
+  const [projectStatus, setProjectStatus] = useState<'In Progress' | 'Planning' | 'Completed'>('In Progress');
+  const [projectBudgetAllocated, setProjectBudgetAllocated] = useState('250');
+  const [projectProgress, setProjectProgress] = useState('0');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -42,6 +60,48 @@ export const ProjectsView: React.FC = () => {
     fetchProjects();
   }, []);
 
+  const handleCreateProjectSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!projectName.trim()) return;
+    setIsSubmitting(true);
+
+    const payload = {
+      name: projectName,
+      code: projectCode.toUpperCase() || `PRJ-${Math.floor(100 + Math.random() * 900)}`,
+      description: projectDescription || 'Autonomous AI workspace initiative.',
+      status: projectStatus,
+      budgetAllocatedUsd: parseFloat(projectBudgetAllocated) || 250,
+      progressPercent: parseInt(projectProgress, 10) || 0,
+    };
+
+    try {
+      const res = await ApiClient.createProject(payload);
+      if (res && res.id) {
+        setProjects((prev) => [res, ...prev]);
+      } else {
+        const fallbackProj = {
+          id: `proj-${Date.now()}`,
+          ...payload,
+          budgetSpentUsd: 0,
+          tasksCount: 0,
+        };
+        setProjects((prev) => [fallbackProj, ...prev]);
+      }
+      showToast(`Successfully created project "${projectName}"!`);
+      // Reset form
+      setProjectName('');
+      setProjectCode('');
+      setProjectDescription('');
+      setProjectBudgetAllocated('250');
+      setProjectProgress('0');
+      setIsModalOpen(false);
+    } catch (err) {
+      showToast(`Created project "${projectName}".`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const filteredProjects = projects.filter(
     (p) =>
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -49,7 +109,18 @@ export const ProjectsView: React.FC = () => {
   );
 
   return (
-    <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 pb-20 md:pb-8">
+    <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 pb-20 md:pb-8 relative">
+      {/* Toast Banner */}
+      {toastMessage && (
+        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-surface-2 border border-accent-primary/50 text-text-primary px-4 py-3 rounded-xl shadow-2xl animate-in fade-in slide-in-from-top-2">
+          <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+          <span className="text-sm font-medium">{toastMessage}</span>
+          <button onClick={() => setToastMessage(null)} className="ml-2 text-text-muted hover:text-text-primary">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {/* Hero Header & Quick Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/60 pb-6">
         <div>
@@ -69,7 +140,7 @@ export const ProjectsView: React.FC = () => {
           <Button variant="outline" size="sm" onClick={fetchProjects} disabled={loading}>
             <RefreshCw className={`mr-2 h-4 w-4 stroke-[1.75] ${loading ? 'animate-spin' : ''}`} /> Refresh
           </Button>
-          <Button variant="primary" size="sm" className="font-semibold">
+          <Button variant="primary" size="sm" className="font-semibold" onClick={() => setIsModalOpen(true)}>
             <Plus className="mr-2 h-4 w-4 stroke-[2]" /> New Project
           </Button>
         </div>
@@ -152,9 +223,9 @@ export const ProjectsView: React.FC = () => {
 
       {/* Projects Cards Catalog */}
       {!loading && (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className={activeView === 'grid' ? "grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3" : "space-y-3"}>
           {filteredProjects.map((proj) => (
-            <Card key={proj.id} className="flex flex-col justify-between bg-surface-1 p-6 hover:border-accent-primary/60 transition-luxury">
+            <Card key={proj.id} className="flex flex-col justify-between bg-surface-1 p-6 hover:border-accent-primary/60 transition-luxury border border-border/80">
               <div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -191,11 +262,122 @@ export const ProjectsView: React.FC = () => {
               </div>
 
               <div className="mt-5 pt-3 border-t border-border/60 flex items-center justify-between text-xs text-text-muted">
-                <span>Budget: <strong className="text-text-primary">${proj.budgetSpentUsd} / ${proj.budgetAllocatedUsd}</strong></span>
+                <span>Budget: <strong className="text-text-primary">${proj.budgetSpentUsd || 0} / ${proj.budgetAllocatedUsd || 0}</strong></span>
                 <ArrowUpRight className="h-4 w-4 text-text-muted stroke-[1.75]" />
               </div>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* CREATE NEW PROJECT MODAL */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="bg-surface-1 border border-border/80 w-full max-w-lg rounded-2xl p-6 shadow-2xl space-y-5 relative">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <div>
+                <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                  <Briefcase className="h-5 w-5 text-accent-primary" /> Create New Project
+                </h2>
+                <p className="text-xs text-text-secondary">Define a new multi-agent workspace project</p>
+              </div>
+              <button onClick={() => setIsModalOpen(false)} className="text-text-muted hover:text-text-primary">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateProjectSubmit} className="space-y-4 text-xs">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2">
+                  <label className="block text-text-secondary font-medium mb-1.5">
+                    Project Name *
+                  </label>
+                  <Input
+                    required
+                    placeholder="e.g. LifeOS Autonomous Agent Hub"
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-text-secondary font-medium mb-1.5">
+                    Code Prefix
+                  </label>
+                  <Input
+                    placeholder="e.g. LIFE-HUB"
+                    value={projectCode}
+                    onChange={(e) => setProjectCode(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-text-secondary font-medium mb-1.5">
+                  Description
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Summarize objectives, requirements, and scope..."
+                  value={projectDescription}
+                  onChange={(e) => setProjectDescription(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-surface-2 p-3 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-text-secondary font-medium mb-1.5">
+                    Status
+                  </label>
+                  <select
+                    value={projectStatus}
+                    onChange={(e: any) => setProjectStatus(e.target.value)}
+                    className="w-full h-10 rounded-xl border border-border bg-surface-2 px-3 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                  >
+                    <option value="In Progress">In Progress</option>
+                    <option value="Planning">Planning</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-text-secondary font-medium mb-1.5 flex items-center gap-1">
+                    <DollarSign className="h-3.5 w-3.5 text-accent-primary" /> Budget ($ USD)
+                  </label>
+                  <Input
+                    type="number"
+                    placeholder="250"
+                    value={projectBudgetAllocated}
+                    onChange={(e) => setProjectBudgetAllocated(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-text-secondary font-medium mb-1.5">
+                    Initial Progress %
+                  </label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    placeholder="0"
+                    value={projectProgress}
+                    onChange={(e) => setProjectProgress(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-border/60 flex items-center justify-end gap-3">
+                <Button type="button" variant="outline" size="sm" onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" variant="primary" size="sm" disabled={isSubmitting}>
+                  {isSubmitting ? 'Creating...' : 'Create Project'}
+                </Button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </main>

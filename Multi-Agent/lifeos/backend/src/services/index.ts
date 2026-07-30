@@ -20,3 +20,5 @@ export * from './analyticsService';
 export * from './aiProviderManager';
 export * from './queueManager';
 export * from './websocketGateway';
+export * from './integrationService';
+

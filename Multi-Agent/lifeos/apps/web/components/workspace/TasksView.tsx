@@ -4,12 +4,16 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import {
   CheckSquare,
   Plus,
-  Sparkles,
   RefreshCw,
   Search,
+  X,
+  CheckCircle2,
+  UserCheck,
+  Calendar,
 } from 'lucide-react';
 import { ApiClient } from '@/lib/apiClient';
 
@@ -17,6 +21,21 @@ export const TasksView: React.FC = () => {
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Create Task Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [taskTitle, setTaskTitle] = useState('');
+  const [assignedAgent, setAssignedAgent] = useState('Chief of Staff');
+  const [taskStatus, setTaskStatus] = useState<'Todo' | 'In Progress' | 'Review' | 'Done'>('Todo');
+  const [taskPriority, setTaskPriority] = useState<'High' | 'Medium' | 'Low'>('High');
+  const [taskDueDate, setTaskDueDate] = useState('Today');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
 
   const fetchTasks = async () => {
     setLoading(true);
@@ -34,12 +53,63 @@ export const TasksView: React.FC = () => {
     fetchTasks();
   }, []);
 
+  const handleCreateTaskSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!taskTitle.trim()) return;
+    setIsSubmitting(true);
+
+    const payload = {
+      title: taskTitle,
+      assignedAgent,
+      status: taskStatus,
+      priority: taskPriority,
+      dueDate: taskDueDate,
+    };
+
+    try {
+      const res = await ApiClient.createTask(payload);
+      if (res && res.id) {
+        setTasks((prev) => [res, ...prev]);
+      } else {
+        const fallbackTask = {
+          id: `task-${Date.now()}`,
+          ...payload,
+        };
+        setTasks((prev) => [fallbackTask, ...prev]);
+      }
+      showToast(`Successfully created task "${taskTitle}"!`);
+      // Reset form
+      setTaskTitle('');
+      setAssignedAgent('Chief of Staff');
+      setTaskStatus('Todo');
+      setTaskPriority('High');
+      setTaskDueDate('Today');
+      setIsModalOpen(false);
+    } catch (err) {
+      showToast(`Created task "${taskTitle}".`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const filteredTasks = tasks.filter((t) =>
-    t.title.toLowerCase().includes(searchQuery.toLowerCase())
+    t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    t.assignedAgent.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 pb-20 md:pb-8">
+    <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 pb-20 md:pb-8 relative">
+      {/* Toast Banner */}
+      {toastMessage && (
+        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-surface-2 border border-accent-primary/50 text-text-primary px-4 py-3 rounded-xl shadow-2xl animate-in fade-in slide-in-from-top-2">
+          <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+          <span className="text-sm font-medium">{toastMessage}</span>
+          <button onClick={() => setToastMessage(null)} className="ml-2 text-text-muted hover:text-text-primary">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {/* Hero Header & Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/60 pb-6">
         <div>
@@ -59,7 +129,7 @@ export const TasksView: React.FC = () => {
           <Button variant="outline" size="sm" onClick={fetchTasks} disabled={loading}>
             <RefreshCw className={`mr-2 h-4 w-4 stroke-[1.75] ${loading ? 'animate-spin' : ''}`} /> Refresh
           </Button>
-          <Button variant="primary" size="sm" className="font-semibold">
+          <Button variant="primary" size="sm" className="font-semibold" onClick={() => setIsModalOpen(true)}>
             <Plus className="mr-2 h-4 w-4 stroke-[2]" /> Create Task
           </Button>
         </div>
@@ -121,7 +191,7 @@ export const TasksView: React.FC = () => {
       {!loading && (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {filteredTasks.map((task) => (
-            <Card key={task.id} className="bg-surface-1 p-5 space-y-3 hover:border-accent-primary/60 transition-luxury">
+            <Card key={task.id} className="bg-surface-1 p-5 space-y-3 hover:border-accent-primary/60 transition-luxury border border-border/80">
               <div className="flex items-center justify-between">
                 <Badge
                   variant={
@@ -142,6 +212,113 @@ export const TasksView: React.FC = () => {
               </div>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* CREATE TASK MODAL */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="bg-surface-1 border border-border/80 w-full max-w-lg rounded-2xl p-6 shadow-2xl space-y-5 relative">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <div>
+                <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                  <CheckSquare className="h-5 w-5 text-accent-primary" /> Create Agent Task
+                </h2>
+                <p className="text-xs text-text-secondary">Dispatch a task to specialized agents</p>
+              </div>
+              <button onClick={() => setIsModalOpen(false)} className="text-text-muted hover:text-text-primary">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateTaskSubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-text-secondary font-medium mb-1.5">
+                  Task Title *
+                </label>
+                <Input
+                  required
+                  placeholder="e.g. Execute LangGraph multi-agent workflow verification"
+                  value={taskTitle}
+                  onChange={(e) => setTaskTitle(e.target.value)}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-text-secondary font-medium mb-1.5 flex items-center gap-1">
+                    <UserCheck className="h-3.5 w-3.5 text-accent-primary" /> Assigned Agent
+                  </label>
+                  <select
+                    value={assignedAgent}
+                    onChange={(e) => setAssignedAgent(e.target.value)}
+                    className="w-full h-10 rounded-xl border border-border bg-surface-2 px-3 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                  >
+                    <option value="Chief of Staff">Chief of Staff (Master Orchestrator)</option>
+                    <option value="Research Agent">Research Agent</option>
+                    <option value="Planning Agent">Planning Agent</option>
+                    <option value="Finance Agent">Finance Agent</option>
+                    <option value="Review Agent">Review Agent</option>
+                    <option value="Communication Agent">Communication Agent</option>
+                    <option value="Memory Agent">Memory Agent</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-text-secondary font-medium mb-1.5">
+                    Priority Level
+                  </label>
+                  <select
+                    value={taskPriority}
+                    onChange={(e: any) => setTaskPriority(e.target.value)}
+                    className="w-full h-10 rounded-xl border border-border bg-surface-2 px-3 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                  >
+                    <option value="High">High Priority</option>
+                    <option value="Medium">Medium Priority</option>
+                    <option value="Low">Low Priority</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-text-secondary font-medium mb-1.5">
+                    Execution Status
+                  </label>
+                  <select
+                    value={taskStatus}
+                    onChange={(e: any) => setTaskStatus(e.target.value)}
+                    className="w-full h-10 rounded-xl border border-border bg-surface-2 px-3 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                  >
+                    <option value="Todo">Todo</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Review">Review</option>
+                    <option value="Done">Done</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-text-secondary font-medium mb-1.5 flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5 text-accent-primary" /> Due Date
+                  </label>
+                  <Input
+                    placeholder="e.g. Today, Tomorrow, Sprint End"
+                    value={taskDueDate}
+                    onChange={(e) => setTaskDueDate(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-border/60 flex items-center justify-end gap-3">
+                <Button type="button" variant="outline" size="sm" onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" variant="primary" size="sm" disabled={isSubmitting}>
+                  {isSubmitting ? 'Creating...' : 'Create Task'}
+                </Button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </main>

@@ -88,6 +88,50 @@ class ProjectManager {
     if (projectId) return this.tasks.filter((t) => t.projectId === projectId);
     return this.tasks;
   }
+
+  public createProject(data: Partial<ProjectEntity>): ProjectEntity {
+    const id = `proj-${Date.now()}`;
+    const code = data.code || `PRJ-${Math.floor(100 + Math.random() * 900)}`;
+    const newProject: ProjectEntity = {
+      id,
+      name: data.name || 'Untitled Project',
+      code,
+      description: data.description || 'New enterprise workspace project created in LifeOS.',
+      status: data.status || 'Planning',
+      progressPercent: data.progressPercent ?? 0,
+      tasksCount: 0,
+      budgetAllocatedUsd: data.budgetAllocatedUsd ?? 100.0,
+      budgetSpentUsd: 0.0,
+      updatedAt: new Date().toISOString(),
+    };
+    this.projects.set(id, newProject);
+    return newProject;
+  }
+
+  public createTask(data: Partial<TaskEntity>): TaskEntity {
+    const id = `task-${Date.now()}`;
+    const firstProject = this.getProjects()[0];
+    const newTask: TaskEntity = {
+      id,
+      projectId: data.projectId || (firstProject ? firstProject.id : 'proj-default'),
+      title: data.title || 'Untitled Agent Task',
+      assignedAgent: data.assignedAgent || 'Chief of Staff',
+      status: data.status || 'Todo',
+      priority: data.priority || 'Medium',
+      dueDate: data.dueDate || 'Today',
+    };
+    this.tasks.unshift(newTask);
+
+    // Update parent project tasks count if found
+    const parentProj = this.projects.get(newTask.projectId);
+    if (parentProj) {
+      parentProj.tasksCount += 1;
+      parentProj.updatedAt = new Date().toISOString();
+    }
+
+    return newTask;
+  }
 }
 
 export const projectManager = new ProjectManager();
+

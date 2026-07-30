@@ -99,6 +99,21 @@ export class ApiClient {
     return res || { projects: [], tasks: [] };
   }
 
+  public static async createProject(payload: any) {
+    return await this.request<any>('/api/v1/projects', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  public static async createTask(payload: any) {
+    return await this.request<any>('/api/v1/tasks', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+
   // 5. Memory & Vector RRF Store
   public static async getMemoryEntries(query?: string) {
     const endpoint = query ? `/api/v1/memory?q=${encodeURIComponent(query)}` : '/api/v1/memory';
@@ -153,4 +168,45 @@ export class ApiClient {
     const res = await this.request<{ sessions: any[]; workspaces: any[] }>('/api/v1/auth/sessions');
     return res || { sessions: [], workspaces: [] };
   }
+
+  // 14. Integrations
+  public static async getIntegrations() {
+    const res = await this.request<{ integrations: any[] }>('/api/v1/integrations');
+    return res || { integrations: [] };
+  }
+
+  public static async connectIntegration(id: string, payload: any) {
+    return await this.request<any>(`/api/v1/integrations/${id}/connect`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  public static async configureIntegration(id: string, payload: any) {
+    return await this.request<any>(`/api/v1/integrations/${id}/configure`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  public static async disconnectIntegration(id: string) {
+    return await this.request<any>(`/api/v1/integrations/${id}/disconnect`, {
+      method: 'POST',
+    });
+  }
+
+  public static async syncAllIntegrations() {
+    const res = await this.request<{ integrations: any[] }>('/api/v1/integrations/sync', {
+      method: 'POST',
+    });
+    return res || { integrations: [] };
+  }
+
+  public static async createCustomWebhook(payload: { name: string; category?: string; webhookUrl: string }) {
+    return await this.request<any>('/api/v1/webhooks/custom', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
 }
+
