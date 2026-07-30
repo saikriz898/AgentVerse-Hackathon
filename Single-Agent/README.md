@@ -407,5 +407,4 @@ cd Single-Agent/review-agent/backend ; python -m pytest tests/ -v
 ## 📄 License & Credits
 
 - **Repository**: [`https://github.com/saikriz898/AgentVerse-Hackathon.git`](https://github.com/saikriz898/AgentVerse-Hackathon.git)
-- **Part of**: LifeOS Autonomous Multi-Agent Ecosystem  
-- **Faculty Mentor**: `Dr.K.SURESH KUMAR`
+- **Part of**: LifeOS Autonomous Multi-Agent Ecosystem
