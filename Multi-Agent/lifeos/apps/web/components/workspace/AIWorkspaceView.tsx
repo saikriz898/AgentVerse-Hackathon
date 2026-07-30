@@ -10,14 +10,23 @@ import {
   Bot,
   Plus,
   Bookmark,
-  Database,
   FileCode,
   LineChart,
   ShieldCheck,
+  User,
+  Loader2,
 } from 'lucide-react';
 
+export interface ChatMessage {
+  id: string;
+  sender: 'user' | 'chief_of_staff';
+  text: string;
+  timestamp: string;
+  isStreaming?: boolean;
+}
+
 export const AIWorkspaceView: React.FC = () => {
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'msg-1',
       sender: 'chief_of_staff',
@@ -32,6 +41,8 @@ export const AIWorkspaceView: React.FC = () => {
     },
   ]);
 
+  const [isThinking, setIsThinking] = useState(false);
+
   const QUICK_PROMPTS = [
     { title: 'Generate PRD Spec', icon: FileCode, category: 'Planning' },
     { title: 'Multi-Source Deep Research', icon: Sparkles, category: 'Research' },
@@ -40,26 +51,31 @@ export const AIWorkspaceView: React.FC = () => {
   ];
 
   const handleSendMessage = (text: string) => {
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `msg-${Date.now()}`,
-        sender: 'user',
-        text,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      },
-      {
+    const userMsg: ChatMessage = {
+      id: `msg-${Date.now()}`,
+      sender: 'user',
+      text,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
+    setIsThinking(true);
+
+    setTimeout(() => {
+      setIsThinking(false);
+      const aiMsg: ChatMessage = {
         id: `msg-${Date.now() + 1}`,
         sender: 'chief_of_staff',
         text: `Understood. Orchestrating specialist agents to process: "${text}". Memory vector loaded and multi-agent pipeline initiated.`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      },
-    ]);
+      };
+      setMessages((prev) => [...prev, aiMsg]);
+    }, 1200);
   };
 
   return (
-    <div className="flex h-full w-full overflow-hidden">
-      {/* Notion-Style Left Conversation & Prompt Panel (260px) */}
+    <div className="flex h-full w-full overflow-hidden bg-background">
+      {/* Notion-Style Left Conversation & Prompt Panel (250px) */}
       <aside className="hidden lg:flex w-64 flex-col border-r border-border/80 bg-sidebar p-3 space-y-4 select-none shrink-0 overflow-y-auto">
         <Button variant="primary" size="sm" className="w-full justify-start rounded-xl font-semibold">
           <Plus className="mr-2 h-4 w-4 stroke-[2]" /> New Session
@@ -109,7 +125,7 @@ export const AIWorkspaceView: React.FC = () => {
         </div>
       </aside>
 
-      {/* Center Canvas (Max Width 900px, Centered) */}
+      {/* Center Natural Conversation Canvas (Max Width 900px, Centered) */}
       <main className="flex flex-1 flex-col justify-between overflow-hidden p-4 md:p-6">
         <div className="flex-1 overflow-y-auto space-y-6 max-w-[900px] w-full mx-auto pr-1">
           {/* Quick Actions Cards Bar */}
@@ -134,35 +150,56 @@ export const AIWorkspaceView: React.FC = () => {
             })}
           </div>
 
-          {/* Messages Feed */}
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              {msg.sender === 'chief_of_staff' && (
-                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-accent-light text-accent-primary shrink-0 shadow-xs">
-                  <Bot className="h-5 w-5 stroke-[1.75]" />
-                </div>
-              )}
+          {/* Natural Grouped Conversation Canvas (No Cards, Natural Flow) */}
+          <div className="space-y-6 py-2">
+            {messages.map((msg, idx) => {
+              const isPrevSameSender = idx > 0 && messages[idx - 1].sender === msg.sender;
 
-              <div
-                className={`max-w-[780px] rounded-2xl p-4 text-sm leading-relaxed ${
-                  msg.sender === 'user'
-                    ? 'bg-accent-primary text-white font-medium shadow-sm'
-                    : 'bg-surface-1 border border-border text-text-primary'
-                }`}
-              >
-                <div className="flex items-center justify-between gap-4 pb-1">
-                  <span className="text-xs font-bold opacity-90">
-                    {msg.sender === 'user' ? 'You' : 'Chief of Staff AI'}
-                  </span>
-                  <span className="text-[10px] opacity-60">{msg.timestamp}</span>
+              if (msg.sender === 'user') {
+                return (
+                  <div key={msg.id} className="flex justify-end my-3">
+                    <div className="max-w-[70%] rounded-2xl bg-accent-primary text-white px-4 py-2.5 text-sm font-medium shadow-sm leading-relaxed">
+                      {msg.text}
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <div key={msg.id} className="flex gap-3.5 my-3">
+                  {!isPrevSameSender ? (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-accent-light text-accent-primary shrink-0 shadow-xs mt-0.5">
+                      <Bot className="h-4 w-4 stroke-[1.75]" />
+                    </div>
+                  ) : (
+                    <div className="w-8 shrink-0" />
+                  )}
+
+                  <div className="flex-1 space-y-1">
+                    {!isPrevSameSender && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-text-primary">Chief of Staff AI</span>
+                        <span className="text-[10px] text-text-muted">{msg.timestamp}</span>
+                      </div>
+                    )}
+                    <p className="text-sm text-text-primary leading-relaxed font-sans">
+                      {msg.text}
+                    </p>
+                  </div>
                 </div>
-                <p className="mt-1">{msg.text}</p>
+              );
+            })}
+
+            {/* Thinking / Streaming Indicator */}
+            {isThinking && (
+              <div className="flex items-center gap-3 text-xs text-text-muted py-2 animate-pulse">
+                <div className="flex h-7 w-7 items-center justify-center rounded-2xl bg-accent-light text-accent-primary">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                </div>
+                <span>Chief of Staff thinking & orchestrating specialist agents...</span>
               </div>
-            </div>
-          ))}
+            )}
+          </div>
 
           {/* Live Multi-Agent Execution Panel */}
           <WorkflowExecutionPanel />

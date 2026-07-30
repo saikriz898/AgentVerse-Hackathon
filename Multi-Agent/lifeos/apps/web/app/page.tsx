@@ -6,6 +6,10 @@ import { Header } from '@/components/layout/Header';
 import { RightContextPanel } from '@/components/layout/RightContextPanel';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { AIWorkspaceView } from '@/components/workspace/AIWorkspaceView';
+import { ProjectsView } from '@/components/workspace/ProjectsView';
+import { TasksView } from '@/components/workspace/TasksView';
+import { KnowledgeView } from '@/components/workspace/KnowledgeView';
+import { DocumentsView } from '@/components/workspace/DocumentsView';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -93,10 +97,15 @@ export default function HomePage() {
         {/* 2. Redesigned 76px Header Bar */}
         <Header />
 
-        {/* 3. Main Workspace Body area */}
-        {activeNavId === 'ai-workspace' ? (
-          <AIWorkspaceView />
-        ) : (
+        {/* 3. Main Workspace Body Area (Dynamic Render) */}
+        {activeNavId === 'ai-workspace' && <AIWorkspaceView />}
+        {activeNavId === 'projects' && <ProjectsView />}
+        {activeNavId === 'tasks' && <TasksView />}
+        {activeNavId === 'knowledge' && <KnowledgeView />}
+        {activeNavId === 'documents' && <DocumentsView />}
+
+        {(activeNavId === 'dashboard' ||
+          !['ai-workspace', 'projects', 'tasks', 'knowledge', 'documents'].includes(activeNavId)) && (
           <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 pb-20 md:pb-8">
             {/* Action Toolbar Banner */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/60 pb-5">
