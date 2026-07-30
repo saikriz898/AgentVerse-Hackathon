@@ -1,0 +1,28 @@
+prompts:
+  project_analysis:
+    template_file: "project_analysis.jinja"
+    description: "Analyzes high-level project goals, requirements, constraints, and research output."
+  task_generation:
+    template_file: "task_generation.jinja"
+    description: "Breaks down project into logical top-level tasks and detailed subtasks."
+  priority_assignment:
+    template_file: "priority_assignment.jinja"
+    description: "Assigns High, Medium, or Low priority to each task based on criticality."
+  timeline_estimation:
+    template_file: "timeline_estimation.jinja"
+    description: "Estimates effort and timelines (hours, days, weeks) for tasks and subtasks."
+  dependency_detection:
+    template_file: "dependency_detection.jinja"
+    description: "Detects topological prerequisites and dependencies between tasks."
+  milestone_generation:
+    template_file: "milestone_generation.jinja"
+    description: "Defines key project milestones based on task clusters and timelines."
+  roadmap_generation:
+    template_file: "roadmap_generation.jinja"
+    description: "Constructs a week-by-week execution roadmap schedule."
+  risk_analysis:
+    template_file: "risk_analysis.jinja"
+    description: "Identifies technical/project risks and formulates mitigation strategies."
+  final_report:
+    template_file: "final_report.jinja"
+    description: "Synthesizes all stage outputs into the final executive JSON planning report."

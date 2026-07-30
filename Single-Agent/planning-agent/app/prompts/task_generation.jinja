@@ -1,0 +1,38 @@
+You are an expert Project Manager. Break down the project into logical top-level tasks and granular subtasks.
+
+Project Name: {{ project_name }}
+Objective: {{ objective }}
+Project Summary: {{ project_summary }}
+
+Features:
+{% for feature in features %}
+- {{ feature }}
+{% endfor %}
+
+Constraints:
+{% for constraint in constraints %}
+- {{ constraint }}
+{% endfor %}
+
+Generate a JSON array of tasks where each task contains:
+- `id`: Unique string ID starting with "TASK-1", "TASK-2", etc.
+- `title`: Concise task name
+- `description`: Clear description of the task objective
+- `subtasks`: Array of subtask objects, each having `id` (e.g. "TASK-1.1"), `title`, `description`, and `estimated_time` (e.g. "4 hours").
+
+Return ONLY valid JSON matching this schema:
+[
+  {
+    "id": "TASK-1",
+    "title": "...",
+    "description": "...",
+    "subtasks": [
+      {
+        "id": "TASK-1.1",
+        "title": "...",
+        "description": "...",
+        "estimated_time": "4 hours"
+      }
+    ]
+  }
+]

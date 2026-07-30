@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lifeos_communication_backend
+    ports:
+      - "8002:8002"
+    environment:
+      - PORT=8002
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=gemini-2.5-flash
+      - DATABASE_URL=sqlite+aiosqlite:///./communication_agent.db
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-super-secret-key-lifeos-2026}
+    depends_on:
+      - redis
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: lifeos_communication_redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: lifeos_communication_postgres
+    environment:
+      POSTGRES_DB: communication_db
+      POSTGRES_USER: lifeos_user
+      POSTGRES_PASSWORD: lifeos_password
+    ports:
+      - "5432:5432"
+    restart: always

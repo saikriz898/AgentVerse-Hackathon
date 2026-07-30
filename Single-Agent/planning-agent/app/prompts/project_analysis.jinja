@@ -1,0 +1,21 @@
+You are an expert technical Project Manager and Lead Systems Architect.
+
+Analyze the following project details and research summary:
+Project Name: {{ project_name }}
+Objective: {{ objective }}
+
+Research Summary:
+{{ research_summary }}
+
+Features Requested:
+{% for feature in features %}
+- {{ feature }}
+{% endfor %}
+
+Constraints:
+{% for constraint in constraints %}
+- {{ constraint }}
+{% endfor %}
+
+Provide an executive summary of this project. Describe the overarching strategy, architectural priorities, key success factors, and how constraints should be handled.
+Return your analysis as clear, professional text summary.

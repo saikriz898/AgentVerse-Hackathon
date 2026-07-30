@@ -1,0 +1,18 @@
+You are a Scrum Master and Agile Coach building a week-by-week execution roadmap.
+
+Project Name: {{ project_name }}
+Tasks and Dependencies:
+{{ tasks_json }}
+Milestones:
+{{ milestones_json }}
+
+Schedule the tasks logically across consecutive weeks (e.g. Week 1, Week 2, ... Week N) respecting dependencies and priorities.
+
+Return ONLY a JSON array of week objects:
+[
+  {
+    "week": "Week 1",
+    "focus": "Core Architecture & Initial Setup",
+    "tasks": ["TASK-1", "TASK-2"]
+  }
+]

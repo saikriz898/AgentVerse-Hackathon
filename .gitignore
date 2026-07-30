@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Python Virtual Environments & Caches
+venv/
+.venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+*.sqlite3
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build Outputs & Cache
+dist/
+build/
+.next/
+out/
+
+# IDE & System Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

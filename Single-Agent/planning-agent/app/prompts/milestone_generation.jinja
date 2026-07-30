@@ -1,0 +1,25 @@
+You are a Senior Project Manager generating key project milestones.
+
+Project Name: {{ project_name }}
+Objective: {{ objective }}
+Tasks:
+{{ tasks_json }}
+
+Group the tasks into 3 to 5 logical project milestones.
+Each milestone must contain:
+- `id`: Milestone ID (e.g. "M1", "M2")
+- `title`: Milestone title
+- `description`: Definition of done / key deliverables
+- `target_timeline`: Target completion timeline (e.g. "End of Week 2")
+- `associated_tasks`: List of task IDs included in this milestone.
+
+Return ONLY a JSON array of milestone objects:
+[
+  {
+    "id": "M1",
+    "title": "...",
+    "description": "...",
+    "target_timeline": "End of Week 2",
+    "associated_tasks": ["TASK-1", "TASK-2"]
+  }
+]

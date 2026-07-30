@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Planning Agent Dashboard</title>
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at 15% 15%, #0f172a 0%, #020617 100%);
+      --accent-blue: #38bdf8;
+      --accent-indigo: #6366f1;
+      --accent-purple: #8b5cf6;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --glass-bg: rgba(15, 23, 42, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --card-bg: rgba(30, 41, 59, 0.5);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Ambient background glow */
+    .glow-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 { width: 450px; height: 450px; background: rgba(99, 102, 241, 0.15); top: -100px; left: -100px; }
+    .orb-2 { width: 550px; height: 550px; background: rgba(139, 92, 246, 0.12); bottom: -150px; right: -100px; }
+
+    .app-container {
+      position: relative;
+      z-index: 1;
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    /* Header Navbar */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 2rem;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      margin-bottom: 1.75rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-title h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-title p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent-emerald);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 10px var(--accent-emerald);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.2); }
+    }
+
+    /* Main Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 380px minmax(0, 1fr);
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 1200px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Cards */
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 1.75rem;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      min-width: 0;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    /* Presets Pills */
+    .presets-container {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .preset-chip {
+      padding: 0.4rem 0.8rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .preset-chip:hover {
+      background: rgba(99, 102, 241, 0.15);
+      color: #fff;
+      border-color: var(--accent-indigo);
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 1.1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 0.4rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.88rem;
+      transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent-indigo);
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 75px;
+    }
+
+    /* Tag Input List */
+    .tag-input-wrapper {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .tag-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.7rem;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 20px;
+      font-size: 0.78rem;
+      color: var(--accent-blue);
+      word-break: break-word;
+    }
+
+    .tag-item .remove-tag {
+      cursor: pointer;
+      opacity: 0.7;
+    }
+    .tag-item .remove-tag:hover { opacity: 1; color: var(--accent-rose); }
+
+    .btn-add-tag {
+      padding: 0.75rem 0.9rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-add-tag:hover { background: rgba(99, 102, 241, 0.2); }
+
+    /* Submit Button */
+    .btn-generate {
+      width: 100%;
+      padding: 0.9rem;
+      margin-top: 0.75rem;
+      background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .btn-generate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(99, 102, 241, 0.6);
+    }
+
+    .btn-generate:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Output Panel Tabs */
+    .tabs-header {
+      display: flex;
+      gap: 0.4rem;
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 0.75rem;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .tab-btn {
+      padding: 0.55rem 1rem;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      color: #fff;
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Summary Stats Grid */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .stat-card {
+      padding: 1.1rem 0.75rem;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      text-align: center;
+      min-width: 0;
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--accent-blue);
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 0.35rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .summary-box {
+      padding: 1.25rem 1.5rem;
+      background: rgba(99, 102, 241, 0.08);
+      border-left: 4px solid var(--accent-indigo);
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      font-size: 0.92rem;
+      line-height: 1.7;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    /* Tasks List */
+    .task-card {
+      background: var(--card-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      transition: all 0.2s;
+    }
+    .task-card:hover {
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateX(4px);
+    }
+
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+      gap: 0.75rem;
+    }
+
+    .task-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .badge-priority {
+      padding: 0.25rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .priority-high { background: rgba(244, 63, 94, 0.2); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3); }
+    .priority-medium { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .priority-low { background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+
+    .subtask-list {
+      margin-top: 1rem;
+      padding-left: 1rem;
+      border-left: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .subtask-item {
+      padding: 0.5rem 0;
+      font-size: 0.85rem;
+    }
+
+    .subtask-item strong {
+      color: var(--accent-blue);
+    }
+
+    /* Milestone Cards */
+    .milestone-card {
+      display: flex;
+      gap: 1.25rem;
+      padding: 1.25rem;
+      background: var(--card-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      margin-bottom: 1rem;
+      align-items: flex-start;
+    }
+
+    .milestone-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-purple);
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    /* Roadmap Timeline */
+    .roadmap-week {
+      position: relative;
+      padding-left: 2rem;
+      margin-bottom: 1.5rem;
+      border-left: 2px dashed rgba(99, 102, 241, 0.4);
+    }
+
+    .roadmap-week::before {
+      content: '';
+      position: absolute;
+      left: -9px;
+      top: 0;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-indigo);
+      box-shadow: 0 0 10px var(--accent-indigo);
+    }
+
+    .week-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+      margin-bottom: 0.25rem;
+    }
+
+    .week-focus {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    /* Risk Cards */
+    .risk-card {
+      padding: 1.25rem;
+      background: rgba(244, 63, 94, 0.05);
+      border: 1px solid rgba(244, 63, 94, 0.2);
+      border-radius: 16px;
+      margin-bottom: 1rem;
+    }
+
+    .risk-title {
+      font-weight: 700;
+      color: #fda4af;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* Empty state & Loading */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .loading-overlay {
+      display: none;
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: var(--accent-indigo);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .step-indicator {
+      font-size: 0.9rem;
+      color: var(--accent-blue);
+      font-weight: 600;
+    }
+
+    /* JSON Code View */
+    pre code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #38bdf8;
+      display: block;
+      background: #020617;
+      padding: 1.25rem;
+      border-radius: 12px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-diagram-project"></i>
+        </div>
+        <div class="brand-title">
+          <h1>AI Planning Agent</h1>
+          <p>Autonomous Project Strategy & Execution Generator</p>
+        </div>
+      </div>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        Engine Online
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <div class="dashboard-grid">
+      <!-- Input Panel -->
+      <div class="glass-card">
+        <div class="card-header">
+          <h2><i class="fa-solid fa-sliders" style="color: var(--accent-indigo);"></i> Project Setup</h2>
+        </div>
+
+        <!-- Presets -->
+        <div style="margin-bottom: 0.5rem; font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">FAST PRESETS:</div>
+        <div class="presets-container">
+          <div class="preset-chip" onclick="loadPreset('ecommerce')">🛍️ E-Commerce Engine</div>
+          <div class="preset-chip" onclick="loadPreset('drone')">🛸 Drone Navigation</div>
+          <div class="preset-chip" onclick="loadPreset('rag')">🤖 RAG Support Bot</div>
+        </div>
+
+        <form id="planForm">
+          <div class="form-group">
+            <label for="projectName">Project Name</label>
+            <input type="text" id="projectName" class="form-control" placeholder="e.g. Autonomous Drone Navigation" required>
+          </div>
+
+          <div class="form-group">
+            <label for="objective">Objective</label>
+            <textarea id="objective" class="form-control" placeholder="Primary goal of the project..." required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="researchSummary">Research Agent Summary</label>
+            <textarea id="researchSummary" class="form-control" style="min-height: 90px;" placeholder="Research findings and architectural recommendations..." required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Features</label>
+            <div class="tag-input-wrapper">
+              <input type="text" id="featureInput" class="form-control" placeholder="Add feature e.g. Real-time telemetry">
+              <button type="button" class="btn-add-tag" onclick="addTag('feature')"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            <div id="featuresList" class="tags-container"></div>
+          </div>
+
+          <div class="form-group">
+            <label>Constraints</label>
+            <div class="tag-input-wrapper">
+              <input type="text" id="constraintInput" class="form-control" placeholder="Add constraint e.g. Max latency 20ms">
+              <button type="button" class="btn-add-tag" onclick="addTag('constraint')"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            <div id="constraintsList" class="tags-container"></div>
+          </div>
+
+          <button type="submit" id="btnSubmit" class="btn-generate">
+            <i class="fa-solid fa-bolt"></i> Generate Project Plan
+          </button>
+        </form>
+      </div>
+
+      <!-- Results Display Panel -->
+      <div class="glass-card">
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-overlay">
+          <div class="spinner"></div>
+          <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Orchestrating LangGraph Workflow...</h3>
+          <p id="loadingStepText" class="step-indicator">Executing Step 1/12: Validating Input</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <h3>Ready to Build Plan</h3>
+          <p>Fill in the project details on the left or select a preset to generate a detailed execution roadmap.</p>
+        </div>
+
+        <!-- Results View -->
+        <div id="resultsContent" style="display: none;">
+          <!-- Navigation Tabs -->
+          <div class="tabs-header">
+            <button class="tab-btn active" onclick="switchTab('overview')"><i class="fa-solid fa-chart-pie"></i> Overview</button>
+            <button class="tab-btn" onclick="switchTab('tasks')"><i class="fa-solid fa-list-check"></i> Tasks & Subtasks</button>
+            <button class="tab-btn" onclick="switchTab('milestones')"><i class="fa-solid fa-flag"></i> Milestones</button>
+            <button class="tab-btn" onclick="switchTab('roadmap')"><i class="fa-solid fa-timeline"></i> Roadmap</button>
+            <button class="tab-btn" onclick="switchTab('risks')"><i class="fa-solid fa-triangle-exclamation"></i> Risks</button>
+            <button class="tab-btn" onclick="switchTab('recs')"><i class="fa-solid fa-lightbulb"></i> Recommendations</button>
+            <button class="tab-btn" onclick="switchTab('json')"><i class="fa-solid fa-code"></i> JSON</button>
+          </div>
+
+          <!-- Tab 1: Overview -->
+          <div id="tab-overview" class="tab-content active">
+            <div class="stats-row">
+              <div class="stat-card">
+                <div id="statTasksCount" class="stat-value">0</div>
+                <div class="stat-label">Tasks</div>
+              </div>
+              <div class="stat-card">
+                <div id="statMilestonesCount" class="stat-value">0</div>
+                <div class="stat-label">Milestones</div>
+              </div>
+              <div class="stat-card">
+                <div id="statWeeksCount" class="stat-value">0</div>
+                <div class="stat-label">Roadmap Weeks</div>
+              </div>
+              <div class="stat-card">
+                <div id="statRisksCount" class="stat-value" style="color: var(--accent-rose);">0</div>
+                <div class="stat-label">Risks Identified</div>
+              </div>
+            </div>
+
+            <h3 style="margin-bottom: 0.75rem; font-size: 1rem;">Executive Summary</h3>
+            <div id="summaryText" class="summary-box"></div>
+          </div>
+
+          <!-- Tab 2: Tasks -->
+          <div id="tab-tasks" class="tab-content">
+            <div id="tasksListContainer"></div>
+          </div>
+
+          <!-- Tab 3: Milestones -->
+          <div id="tab-milestones" class="tab-content">
+            <div id="milestonesContainer"></div>
+          </div>
+
+          <!-- Tab 4: Roadmap -->
+          <div id="tab-roadmap" class="tab-content">
+            <div id="roadmapContainer"></div>
+          </div>
+
+          <!-- Tab 5: Risks -->
+          <div id="tab-risks" class="tab-content">
+            <div id="risksContainer"></div>
+          </div>
+
+          <!-- Tab 6: Recommendations -->
+          <div id="tab-recs" class="tab-content">
+            <div id="recsContainer" class="summary-box" style="border-left-color: var(--accent-amber); background: rgba(245, 158, 11, 0.08);"></div>
+          </div>
+
+          <!-- Tab 7: JSON -->
+          <div id="tab-json" class="tab-content">
+            <pre><code id="jsonOutput"></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let features = ["User behavior tracking", "Collaborative filtering", "REST API"];
+    let constraints = ["Latency under 50ms", "Deploy on AWS"];
+    let currentPlanData = null;
+
+    const presets = {
+      ecommerce: {
+        name: "E-Commerce Recommendation System",
+        objective: "Build a scalable, real-time product recommendation microservice using hybrid collaborative filtering.",
+        research: "High traffic e-commerce store needs dynamic product recommendations with latency under 50ms.",
+        features: ["User behavior tracking", "Hybrid recommendation engine", "REST API endpoint", "Real-time feature store cache"],
+        constraints: ["Deploy on AWS ECS", "Max response latency 50ms", "10,000 requests/sec"]
+      },
+      drone: {
+        name: "Autonomous Drone Navigation",
+        objective: "Build low-latency visual SLAM path planning algorithm for real-time obstacle avoidance.",
+        research: "Drone fleet operating in indoor warehouse environments without GPS signal.",
+        features: ["Visual SLAM", "Obstacle avoidance", "Real-time telemetry", "Emergency override"],
+        constraints: ["Latency under 20ms", "Embedded Linux ARM", "Low power consumption"]
+      },
+      rag: {
+        name: "AI Customer Support RAG Agent",
+        objective: "Automate tier-1 support ticket resolution using knowledge base retrieval-augmented generation.",
+        research: "Support team receives 5000 repetitive tickets/day. Vector database RAG architecture recommended.",
+        features: ["Knowledge base RAG", "Ticket escalation handler", "Admin analytics dashboard"],
+        constraints: ["SOC2 compliance", "Max response time 3 seconds", "Integration with Zendesk"]
+      }
+    };
+
+    function renderTags() {
+      document.getElementById('featuresList').innerHTML = features.map((f, i) => 
+        `<div class="tag-item">${f} <i class="fa-solid fa-xmark remove-tag" onclick="removeTag('feature', ${i})"></i></div>`
+      ).join('');
+
+      document.getElementById('constraintsList').innerHTML = constraints.map((c, i) => 
+        `<div class="tag-item" style="color: var(--accent-amber); background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3);">${c} <i class="fa-solid fa-xmark remove-tag" onclick="removeTag('constraint', ${i})"></i></div>`
+      ).join('');
+    }
+
+    function addTag(type) {
+      const input = document.getElementById(type === 'feature' ? 'featureInput' : 'constraintInput');
+      const val = input.value ? input.value.trim() : '';
+      if (val) {
+        if (type === 'feature') features.push(val);
+        else constraints.push(val);
+        input.value = '';
+        renderTags();
+      }
+    }
+
+    function removeTag(type, index) {
+      if (type === 'feature') features.splice(index, 1);
+      else constraints.splice(index, 1);
+      renderTags();
+    }
+
+    function loadPreset(key) {
+      const p = presets[key];
+      if (!p) return;
+      document.getElementById('projectName').value = p.name;
+      document.getElementById('objective').value = p.objective;
+      document.getElementById('researchSummary').value = p.research;
+      features = [...p.features];
+      constraints = [...p.constraints];
+      renderTags();
+    }
+
+    // Initialize tags on load
+    loadPreset('ecommerce');
+
+    // Handle form submit
+    document.getElementById('planForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        project_name: document.getElementById('projectName').value,
+        objective: document.getElementById('objective').value,
+        research_summary: document.getElementById('researchSummary').value,
+        features: features,
+        constraints: constraints
+      };
+
+      // UI States
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('resultsContent').style.display = 'none';
+      document.getElementById('loadingState').style.display = 'block';
+      document.getElementById('btnSubmit').disabled = true;
+
+      // Simulate step progression text
+      const steps = [
+        "Validating Input...",
+        "Analyzing Project Objectives...",
+        "Generating Top-Level Tasks...",
+        "Decomposing Subtasks Breakdown...",
+        "Assigning Task Priorities...",
+        "Estimating Timelines & Effort...",
+        "Detecting Prerequisites & DAG Dependencies...",
+        "Grouping Project Milestones...",
+        "Building Week-by-Week Execution Roadmap...",
+        "Evaluating Technical Risks & Mitigations...",
+        "Formulating Strategic Recommendations...",
+        "Compiling Structured JSON Report..."
+      ];
+      let stepIdx = 0;
+      const stepInterval = setInterval(() => {
+        if (stepIdx < steps.length) {
+          document.getElementById('loadingStepText').innerText = `Step ${stepIdx + 1}/12: ${steps[stepIdx]}`;
+          stepIdx++;
+        }
+      }, 350);
+
+      try {
+        const response = await fetch('/plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        clearInterval(stepInterval);
+
+        if (!response.ok) {
+          throw new Error(`Server returned HTTP ${response.status}`);
+        }
+
+        currentPlanData = await response.json();
+        renderResults(currentPlanData);
+
+      } catch (err) {
+        clearInterval(stepInterval);
+        alert(`Error generating plan: ${err.message}`);
+      } finally {
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('btnSubmit').disabled = false;
+      }
+    });
+
+    function renderResults(data) {
+      document.getElementById('resultsContent').style.display = 'block';
+
+      // Stats
+      document.getElementById('statTasksCount').innerText = data.tasks ? data.tasks.length : 0;
+      document.getElementById('statMilestonesCount').innerText = data.milestones ? data.milestones.length : 0;
+      document.getElementById('statWeeksCount').innerText = data.roadmap ? data.roadmap.length : 0;
+      document.getElementById('statRisksCount').innerText = data.risks ? data.risks.length : 0;
+
+      // Summary
+      document.getElementById('summaryText').innerText = data.project_summary || "No summary provided.";
+
+      // Tasks
+      document.getElementById('tasksListContainer').innerHTML = (data.tasks || []).map(task => `
+        <div class="task-card">
+          <div class="task-header">
+            <div class="task-title">
+              <span style="color: var(--accent-indigo); font-family: monospace;">[${task.id}]</span>
+              ${task.title}
+            </div>
+            <span class="badge-priority priority-${(task.priority || 'medium').toLowerCase()}">${task.priority || 'Medium'}</span>
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.5rem;">${task.description}</p>
+          <div style="font-size: 0.8rem; color: var(--accent-blue); font-weight: 600; margin-bottom: 0.5rem;">
+            ⏱️ Estimated Effort: ${task.estimated_time || 'N/A'} ${task.dependencies && task.dependencies.length ? ` | 🔗 Depends on: ${task.dependencies.join(', ')}` : ''}
+          </div>
+          ${task.subtasks && task.subtasks.length ? `
+            <div class="subtask-list">
+              ${task.subtasks.map(st => `
+                <div class="subtask-item">
+                  <strong>[${st.id}]</strong> ${st.title} &mdash; <span style="color: var(--text-muted);">${st.description} (${st.estimated_time})</span>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+
+      // Milestones
+      document.getElementById('milestonesContainer').innerHTML = (data.milestones || []).map(m => `
+        <div class="milestone-card">
+          <div class="milestone-icon"><i class="fa-solid fa-flag"></i></div>
+          <div>
+            <h4 style="font-size: 1rem; font-weight: 700;">[${m.id}] ${m.title}</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.25rem 0;">${m.description}</p>
+            <div style="font-size: 0.8rem; color: var(--accent-emerald); font-weight: 600;">
+              📅 Target Timeline: ${m.target_timeline} | Tasks: ${m.associated_tasks ? m.associated_tasks.join(', ') : 'None'}
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Roadmap
+      document.getElementById('roadmapContainer').innerHTML = (data.roadmap || []).map(r => `
+        <div class="roadmap-week">
+          <div class="week-title">${r.week}</div>
+          <div class="week-focus">Focus: ${r.focus}</div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            ${(r.tasks || []).map(t => `<span class="tag-item">${t}</span>`).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      // Risks
+      document.getElementById('risksContainer').innerHTML = (data.risks || []).map(risk => `
+        <div class="risk-card">
+          <div class="risk-title">
+            <span>⚠️ ${risk.risk}</span>
+            <span class="badge-priority priority-${(risk.impact || 'medium').toLowerCase()}">Impact: ${risk.impact}</span>
+          </div>
+          <p style="font-size: 0.85rem; color: #cbd5e1;">💡 <strong>Mitigation:</strong> ${risk.mitigation}</p>
+        </div>
+      `).join('');
+
+      // Recommendations
+      document.getElementById('recsContainer').innerHTML = `
+        <ul style="padding-left: 1.25rem;">
+          ${(data.recommendations || []).map(rec => `<li style="margin-bottom: 0.5rem;">${rec}</li>`).join('')}
+        </ul>
+      `;
+
+      // JSON
+      document.getElementById('jsonOutput').innerText = JSON.stringify(data, null, 2);
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      event.currentTarget.classList.add('active');
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+You are a Technical Risk Officer and Security Architect.
+
+Project Name: {{ project_name }}
+Objective: {{ objective }}
+Constraints:
+{% for constraint in constraints %}
+- {{ constraint }}
+{% endfor %}
+
+Tasks:
+{{ tasks_json }}
+
+Identify 3 to 6 critical project/technical risks, evaluate their impact level (High, Medium, or Low), and provide actionable mitigation strategies.
+
+Return ONLY a JSON array of risk objects:
+[
+  {
+    "risk": "Description of potential bottleneck or technical challenge",
+    "impact": "High",
+    "mitigation": "Mitigation strategy..."
+  }
+]

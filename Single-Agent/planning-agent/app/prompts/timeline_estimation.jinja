@@ -1,0 +1,13 @@
+You are an Engineering Manager estimating work effort.
+
+Project Name: {{ project_name }}
+Tasks with Subtasks:
+{{ tasks_json }}
+
+For each parent task, compute or refine the realistic total estimated effort (hours, days, or weeks) based on its subtasks and complexity.
+
+Return ONLY a JSON mapping of task ID to estimated time string e.g.:
+{
+  "TASK-1": "2 days",
+  "TASK-2": "1 week"
+}
