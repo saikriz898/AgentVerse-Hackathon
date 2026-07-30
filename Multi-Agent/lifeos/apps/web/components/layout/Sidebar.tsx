@@ -42,6 +42,7 @@ const NAVIGATION_GROUPS: NavGroup[] = [
     items: [
       { id: 'dashboard', label: 'Dashboard', icon: Home },
       { id: 'ai-workspace', label: 'AI Workspace', icon: Bot },
+      { id: 'admin-control', label: 'Control Center', icon: Activity },
     ],
   },
   {

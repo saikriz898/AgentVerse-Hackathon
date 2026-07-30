@@ -18,6 +18,7 @@ import { IntegrationsView } from '@/components/workspace/IntegrationsView';
 import { NotificationsView } from '@/components/workspace/NotificationsView';
 import { SettingsView } from '@/components/workspace/SettingsView';
 import { ProfileView } from '@/components/workspace/ProfileView';
+import { AdminControlCenter } from '@/components/admin/AdminControlCenter';
 
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -135,6 +136,7 @@ export default function HomePage() {
         {activeNavId === 'notifications' && <NotificationsView />}
         {activeNavId === 'settings' && <SettingsView />}
         {activeNavId === 'profile' && <ProfileView />}
+        {activeNavId === 'admin-control' && <AdminControlCenter />}
 
         {activeNavId === 'dashboard' && (
           <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 pb-20 md:pb-8">
