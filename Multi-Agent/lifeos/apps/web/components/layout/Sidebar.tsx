@@ -19,6 +19,11 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Activity,
+  DollarSign,
+  Calendar,
+  ShieldCheck,
+  Database,
+  Cpu,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/lib/stores/useUIStore';
@@ -46,32 +51,39 @@ const NAVIGATION_GROUPS: NavGroup[] = [
     ],
   },
   {
-    title: 'WORK',
+    title: 'WORK & PROJECTS',
     items: [
       { id: 'projects', label: 'Projects', icon: FolderKanban },
-      { id: 'tasks', label: 'Tasks', icon: CheckSquare },
-      { id: 'knowledge', label: 'Knowledge', icon: BookOpen },
+      { id: 'tasks', label: 'Tasks & Milestones', icon: CheckSquare },
+      { id: 'knowledge', label: 'Knowledge Base', icon: BookOpen },
+      { id: 'graph-topology', label: 'Graph Topology', icon: Share2 },
       { id: 'documents', label: 'Documents', icon: FileText },
     ],
   },
   {
-    title: 'AUTOMATION',
+    title: 'SPECIALIST AGENTS',
     items: [
-      { id: 'automation', label: 'Automation', icon: Zap },
-      { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+      { id: 'planning-agent', label: 'Planning Agent (DAG)', icon: Calendar, badge: '10 Stages' },
+      { id: 'research-agent', label: 'Research Agent (Web & Code)', icon: Search, badge: '100% Fact' },
+      { id: 'review-agent', label: 'Review Agent (OWASP & QA)', icon: ShieldCheck, badge: '14 Tests' },
+      { id: 'memory-agent', label: 'Memory Agent (pgvector)', icon: Database, badge: 'RRF' },
+      { id: 'account-manager', label: 'Finance & Cloud Billing', icon: DollarSign, badge: '$4.2k' },
     ],
   },
   {
     title: 'PLATFORM',
     items: [
-      { id: 'ai-models', label: 'AI Models', icon: Box },
-      { id: 'search', label: 'Search', icon: Search },
+      { id: 'ai-models', label: 'AI Fleet Models', icon: Box },
+      { id: 'tech-stack', label: 'Tech Stack & PRD/TRD Specs', icon: Cpu, badge: 'Specs' },
+      { id: 'search', label: 'Global Search', icon: Search },
       { id: 'integrations', label: 'Integrations', icon: Share2 },
     ],
   },
   {
-    title: 'SYSTEM',
+    title: 'AUTOMATION & SYSTEM',
     items: [
+      { id: 'automation', label: 'Automation Workflows', icon: Zap },
+      { id: 'analytics', label: 'Analytics', icon: BarChart3 },
       { id: 'notifications', label: 'Notifications', icon: Bell },
       { id: 'settings', label: 'Settings', icon: Settings },
       { id: 'profile', label: 'Profile', icon: User },

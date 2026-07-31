@@ -15,9 +15,11 @@ import {
   ShieldCheck,
   Rocket,
   Layers,
+  Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAIWorkspaceStore } from '@/lib/stores/useAIWorkspaceStore';
+import { ContextBuilderModal } from '@/components/workspace/ContextBuilderModal';
 import { cn } from '@/lib/utils';
 
 export interface ComposerProps {
@@ -28,11 +30,15 @@ export const Composer: React.FC<ComposerProps> = ({ onSend }) => {
   const [text, setText] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
   const [showSlashMenu, setShowSlashMenu] = useState(false);
+  const [isOptimizerActive, setIsOptimizerActive] = useState(true);
+  const [isContextBuilderOpen, setIsContextBuilderOpen] = useState(false);
 
   const { isDeepResearch, isMemorySyncEnabled, toggleDeepResearch, toggleMemorySync } = useAIWorkspaceStore();
 
   const SLASH_COMMANDS = [
     { command: '/build', description: 'Execute full Startup SDLC (Requirements -> Arch -> Code -> QA -> Deploy)' },
+    { command: '/optimize', description: 'Run Prompt Optimizer gap analysis & expand execution plan' },
+    { command: '/sdlc', description: 'Execute 18-stage SDLC autonomous multi-agent pipeline' },
     { command: '/prd', description: 'Generate a 10-stage PRD technical specification & feature roadmap' },
     { command: '/arch', description: 'Design system topology, database schema & OpenAPI v3 contracts' },
     { command: '/cost', description: 'Estimate multi-cloud infrastructure cost & ROI break-even' },
@@ -63,6 +69,10 @@ export const Composer: React.FC<ComposerProps> = ({ onSend }) => {
     setShowSlashMenu(false);
   };
 
+  const handleApplyContextBlock = (contextBlock: string) => {
+    setText((prev) => (prev ? `${prev}\n\n${contextBlock}` : contextBlock));
+  };
+
   return (
     <div className="relative w-full max-w-4xl mx-auto rounded-2xl border border-border bg-surface-1 p-3.5 shadow-lg transition-luxury">
       {/* Mode Toggles Toolbar */}
@@ -90,131 +100,83 @@ export const Composer: React.FC<ComposerProps> = ({ onSend }) => {
           )}
         >
           <Database className="h-3.5 w-3.5" />
-          <span>Memory RRF Sync: {isMemorySyncEnabled ? 'ON' : 'OFF'}</span>
+          <span>pgvector RRF: {isMemorySyncEnabled ? 'CONNECTED' : 'OFF'}</span>
         </button>
 
-        {/* Action Button Chips */}
-        <div className="ml-auto flex items-center gap-1.5">
-          <button
-            onClick={() => onSend?.('/build Build School ERP')}
-            className="flex items-center gap-1 px-2 py-1 text-[11px] rounded-lg border border-border bg-surface-2 text-text-secondary hover:text-text-primary transition-luxury font-semibold"
-          >
-            <Rocket className="h-3 w-3 text-accent-primary" /> Build App
-          </button>
-          <button
-            onClick={() => onSend?.('/prd')}
-            className="flex items-center gap-1 px-2 py-1 text-[11px] rounded-lg border border-border bg-surface-2 text-text-secondary hover:text-text-primary transition-luxury"
-          >
-            <FileCode className="h-3 w-3 text-accent-primary" /> PRD
-          </button>
-          <button
-            onClick={() => onSend?.('/arch')}
-            className="flex items-center gap-1 px-2 py-1 text-[11px] rounded-lg border border-border bg-surface-2 text-text-secondary hover:text-text-primary transition-luxury"
-          >
-            <Layers className="h-3 w-3 text-accent-primary" /> Arch
-          </button>
-          <button
-            onClick={() => onSend?.('/qa')}
-            className="flex items-center gap-1 px-2 py-1 text-[11px] rounded-lg border border-border bg-surface-2 text-text-secondary hover:text-text-primary transition-luxury"
-          >
-            <ShieldCheck className="h-3 w-3 text-accent-primary" /> QA
-          </button>
-        </div>
+        <button
+          onClick={() => setIsOptimizerActive(!isOptimizerActive)}
+          className={cn(
+            'flex items-center gap-1.5 px-2.5 py-1 rounded-xl font-medium border transition-luxury',
+            isOptimizerActive
+              ? 'bg-accent-light border-accent-primary text-accent-primary font-semibold'
+              : 'border-border text-text-muted hover:text-text-primary'
+          )}
+        >
+          <Zap className="h-3.5 w-3.5 text-accent-primary" />
+          <span>Prompt Optimizer: {isOptimizerActive ? 'ON' : 'OFF'}</span>
+        </button>
+
+        <button
+          onClick={() => setIsContextBuilderOpen(true)}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl font-semibold border border-purple-500/30 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 transition-luxury"
+        >
+          <Layers className="h-3.5 w-3.5 text-purple-400" />
+          <span>🧩 Context Builder</span>
+        </button>
       </div>
 
-      {/* Slash Command Autocomplete Menu */}
+      {/* Input Area */}
+      <textarea
+        value={text}
+        onChange={handleTextChange}
+        onKeyDown={handleKeyDown}
+        placeholder="Type a goal or command (e.g. /build, /aidlc, /optimize, or plain prompt)..."
+        className="w-full resize-none bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none min-h-[70px] max-h-[180px] font-sans leading-relaxed"
+      />
+
+      {/* Slash Commands Floating Menu */}
       {showSlashMenu && (
-        <div className="absolute bottom-full left-0 mb-2 w-full max-w-md rounded-2xl border border-border bg-surface-1 p-2 shadow-2xl z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
-          <div className="px-3 py-1.5 text-[11px] font-semibold text-text-muted border-b border-border/60">
-            SDLC Slash Commands
+        <div className="absolute bottom-full left-3 mb-2 w-80 rounded-2xl border border-border/80 bg-surface-1 p-2 shadow-2xl z-50 animate-in fade-in slide-in-from-bottom-2">
+          <div className="px-2 py-1 text-[11px] font-bold text-text-muted uppercase tracking-wider border-b border-border/40 mb-1">
+            Available Slash Commands
           </div>
-          <div className="space-y-1 mt-1">
-            {SLASH_COMMANDS.map((sc, idx) => (
+          <div className="space-y-1 max-h-48 overflow-y-auto">
+            {SLASH_COMMANDS.map((item) => (
               <button
-                key={idx}
+                key={item.command}
                 onClick={() => {
-                  setText(sc.command + ' ');
+                  setText(item.command + ' ');
                   setShowSlashMenu(false);
                 }}
-                className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs hover:bg-accent-light hover:text-accent-primary transition-luxury text-left"
+                className="flex w-full flex-col text-left rounded-xl px-2.5 py-1.5 hover:bg-surface-2 transition-luxury"
               >
-                <span className="font-mono font-bold text-accent-primary">{sc.command}</span>
-                <span className="text-text-muted truncate ml-2">{sc.description}</span>
+                <span className="font-mono text-xs font-bold text-accent-primary">{item.command}</span>
+                <span className="text-[11px] text-text-secondary truncate">{item.description}</span>
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* File Badges */}
-      {attachedFiles.length > 0 && (
-        <div className="flex flex-wrap gap-2 pb-2.5 border-b border-border/60 mb-2">
-          {attachedFiles.map((file, idx) => (
-            <span
-              key={idx}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface-2 px-2.5 py-1 text-xs text-text-secondary"
-            >
-              <FileText className="h-3.5 w-3.5 text-accent-primary" />
-              <span>{file}</span>
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Multi-line Text Area */}
-      <textarea
-        value={text}
-        onChange={handleTextChange}
-        onKeyDown={handleKeyDown}
-        placeholder="Ask your Chief of Staff AI to build an app or type / for slash commands..."
-        rows={2}
-        className="w-full resize-none bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none leading-relaxed"
-      />
-
-      {/* Composer Action Toolbar */}
-      <div className="flex items-center justify-between pt-2 border-t border-border/60">
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => setAttachedFiles((prev) => [...prev, 'architecture-spec.pdf'])}
-            className="flex h-8 w-8 items-center justify-center rounded-xl text-text-muted hover:bg-surface-2 hover:text-text-primary transition-luxury"
-            title="Attach File"
-          >
-            <Paperclip className="h-4 w-4 stroke-[1.75]" />
-          </button>
-
-          <button
-            onClick={() => setText((prev) => prev + '/')}
-            className="flex h-8 px-2.5 items-center gap-1 text-xs font-mono text-text-muted hover:bg-surface-2 hover:text-accent-primary rounded-xl transition-luxury"
-            title="Slash Commands"
-          >
-            <Terminal className="h-3.5 w-3.5" />
-            <span>/</span>
-          </button>
-
-          <button
-            className="flex h-8 w-8 items-center justify-center rounded-xl text-text-muted hover:bg-surface-2 hover:text-text-primary transition-luxury"
-            title="Voice Input"
-          >
-            <Mic className="h-4 w-4 stroke-[1.75]" />
-          </button>
+      {/* Bottom Action Controls */}
+      <div className="flex items-center justify-between pt-2 border-t border-border/40">
+        <div className="flex items-center gap-1.5 text-xs text-text-muted">
+          <span className="font-mono text-[11px]">⌘+Enter to execute 18-stage pipeline</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <kbd className="hidden sm:inline-flex items-center gap-1 text-[10px] font-mono text-text-muted">
-            <Command className="h-3 w-3" /> Enter
-          </kbd>
-
-          <Button
-            onClick={handleSend}
-            disabled={!text.trim()}
-            size="sm"
-            className="h-9 px-4 rounded-xl font-semibold"
-          >
-            <span>Execute</span>
-            <Play className="ml-1.5 h-3.5 w-3.5 fill-white stroke-none" />
+          <Button variant="primary" size="md" onClick={handleSend} disabled={!text.trim()} className="font-semibold px-5">
+            <Sparkles className="mr-1.5 h-4 w-4" /> Execute Goal
           </Button>
         </div>
       </div>
+
+      {/* Context Builder Modal */}
+      <ContextBuilderModal
+        isOpen={isContextBuilderOpen}
+        onClose={() => setIsContextBuilderOpen(false)}
+        onApplyContext={handleApplyContextBlock}
+      />
     </div>
   );
 };

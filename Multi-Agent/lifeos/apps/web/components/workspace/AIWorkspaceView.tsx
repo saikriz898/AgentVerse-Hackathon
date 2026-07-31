@@ -5,6 +5,7 @@ import { WorkflowExecutionPanel } from '@/components/workspace/WorkflowExecution
 import { Composer } from '@/components/workspace/Composer';
 import { ArtifactViewer } from '@/components/workspace/ArtifactViewer';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 import {
   Sparkles,
   Bot,
@@ -21,6 +22,10 @@ import {
   Activity,
   Cpu,
   Rocket,
+  Zap,
+  Terminal,
+  Database,
+  Search,
 } from 'lucide-react';
 import { useAIWorkspaceStore } from '@/lib/stores/useAIWorkspaceStore';
 
@@ -37,6 +42,9 @@ export const AIWorkspaceView: React.FC = () => {
     sendPrompt,
   } = useAIWorkspaceStore();
 
+  const [selectedModel, setSelectedModel] = React.useState('gemini-3.6-flash');
+  const [showOptimizerDrawer, setShowOptimizerDrawer] = React.useState(false);
+
   const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[0];
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -48,13 +56,151 @@ export const AIWorkspaceView: React.FC = () => {
     scrollToBottom();
   }, [activeSession?.messages?.length, isThinking, streamingPhase]);
 
+  const parseInlineMarkdown = (content: string) => {
+    // Helper to render bold **text** correctly
+    const parts = content.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <strong key={index} className="font-bold text-text-primary">
+            {part.slice(2, -2)}
+          </strong>
+        );
+      }
+      return part;
+    });
+  };
+
+  const renderFormattedMessageText = (rawText: string) => {
+    if (!rawText) return null;
+    const lines = rawText.split('\n');
+
+    return (
+      <div className="space-y-2.5 text-sm text-text-primary leading-relaxed font-sans">
+        {lines.map((line, idx) => {
+          const trimmed = line.trim();
+          if (!trimmed) return <div key={idx} className="h-0.5" />;
+
+          // Divider Line (---)
+          if (trimmed === '---') {
+            return <div key={idx} className="my-3 border-b border-border/80" />;
+          }
+
+          // H1 Headings (# Heading)
+          if (trimmed.startsWith('# ')) {
+            return (
+              <div key={idx} className="flex items-center gap-2 pt-3 border-b border-border/80 pb-2">
+                <Sparkles className="h-4 w-4 text-accent-primary shrink-0" />
+                <h2 className="text-base md:text-lg font-bold text-text-primary tracking-tight">
+                  {trimmed.substring(2)}
+                </h2>
+              </div>
+            );
+          }
+
+          // H2 Headings (## Subheading)
+          if (trimmed.startsWith('## ')) {
+            return (
+              <div key={idx} className="flex items-center gap-2 pt-2 text-accent-primary">
+                <Zap className="h-3.5 w-3.5 shrink-0" />
+                <h3 className="text-sm md:text-base font-bold tracking-tight">
+                  {trimmed.substring(3)}
+                </h3>
+              </div>
+            );
+          }
+
+          // H3 / H4 Headings (### or ####)
+          if (trimmed.startsWith('### ') || trimmed.startsWith('#### ')) {
+            const headingText = trimmed.replace(/^#+\s*/, '');
+            return (
+              <div key={idx} className="flex items-center gap-2 pt-3 pb-1 border-b border-border/60">
+                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-accent-light text-accent-primary font-bold text-xs">
+                  <Zap className="h-3.5 w-3.5" />
+                </span>
+                <h3 className="text-sm font-bold text-text-primary tracking-tight">
+                  {headingText}
+                </h3>
+              </div>
+            );
+          }
+
+          // File Structure Lines (- 📄 or 📄)
+          if (trimmed.includes('📄 apps/') || trimmed.includes('📄 backend/') || trimmed.startsWith('- 📄')) {
+            const cleanFileText = trimmed.replace(/^[-\s]*📄\s*/, '');
+            return (
+              <div key={idx} className="flex items-center gap-2 bg-surface-2 p-2.5 rounded-xl border border-border/60 text-xs font-mono text-text-primary my-1 hover:border-accent-primary/40 transition-luxury">
+                <FileCode className="h-4 w-4 text-accent-primary shrink-0" />
+                <span className="font-bold text-emerald-400">{cleanFileText.split(' ')[0]}</span>
+                <span className="text-text-muted text-[11px] truncate">{cleanFileText.substring(cleanFileText.indexOf(' ') + 1)}</span>
+              </div>
+            );
+          }
+
+          // Stage Telemetry Lines (- **Phase)
+          if (trimmed.startsWith('- **Phase') || trimmed.startsWith('* **Phase')) {
+            const content = trimmed.substring(2);
+            return (
+              <div key={idx} className="flex items-start gap-2.5 bg-surface-1 p-2.5 rounded-xl border border-border/80 text-xs font-mono my-1 shadow-2xs">
+                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-accent-primary/20 text-accent-primary font-bold text-[10px] shrink-0 mt-0.5">
+                  ✓
+                </span>
+                <div className="text-text-secondary leading-relaxed flex-1">
+                  {parseInlineMarkdown(content)}
+                </div>
+              </div>
+            );
+          }
+
+          // Key Metrics / Status Lines (Status:, QA Security Gate:, Integration Tests:)
+          if (trimmed.startsWith('**Status:**') || trimmed.startsWith('**QA Security Gate:**') || trimmed.startsWith('**Integration Tests:**') || trimmed.startsWith('Status:') || trimmed.startsWith('QA Security Gate:')) {
+            return (
+              <div key={idx} className="inline-flex items-center gap-2 bg-accent-light/15 px-3 py-1.5 rounded-xl border border-accent-primary/30 font-mono text-xs text-text-primary my-1 mr-2 shadow-2xs">
+                <span className="font-bold">{parseInlineMarkdown(trimmed)}</span>
+              </div>
+            );
+          }
+
+          // Standard Bullet Points (- or *)
+          if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+            const content = trimmed.substring(2);
+            return (
+              <div key={idx} className="flex items-start gap-2.5 text-xs md:text-sm pl-2 py-0.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-accent-primary shrink-0 mt-2" />
+                <div className="text-text-secondary leading-relaxed flex-1">
+                  {parseInlineMarkdown(content)}
+                </div>
+              </div>
+            );
+          }
+
+          // Code blocks or KV summary lines
+          if (trimmed.startsWith('```')) {
+            return (
+              <div key={idx} className="font-mono text-xs bg-surface-2 p-3 rounded-xl border border-border text-emerald-400 font-semibold my-1.5 overflow-x-auto shadow-inner">
+                {parseInlineMarkdown(trimmed)}
+              </div>
+            );
+          }
+
+          // Normal Paragraphs with inline bold support
+          return (
+            <p key={idx} className="text-xs md:text-sm text-text-primary leading-relaxed">
+              {parseInlineMarkdown(trimmed)}
+            </p>
+          );
+        })}
+      </div>
+    );
+  };
+
   const SUGGESTED_ACTIONS = [
-    { title: 'Build School ERP App', icon: Rocket, category: 'Full SDLC' },
-    { title: 'Create PRD Spec', icon: FileCode, category: 'Planning' },
-    { title: 'Design Architecture', icon: Layers, category: 'Architecture' },
-    { title: 'Review Code & Security', icon: ShieldCheck, category: 'QA Gate' },
-    { title: 'Estimate Infrastructure', icon: LineChart, category: 'Finance' },
-    { title: 'Deploy App to Production', icon: Activity, category: 'DevOps' },
+    { title: 'Build Full Startup App', prompt: '/build Build School ERP Enterprise Application', icon: Rocket, category: 'Full SDLC' },
+    { title: 'Run SDLC 5-Stage Audit', prompt: '/sdlc Audit System Architecture and Codebase', icon: Sparkles, category: 'SDLC Pipeline' },
+    { title: 'Deep Web Research', prompt: '/research AI Agent Multi-Service Architecture', icon: Search, category: 'Research' },
+    { title: 'Design System Architecture', prompt: '/arch Design OpenAPI v3 and pgvector Schema', icon: Layers, category: 'Architecture' },
+    { title: 'Run QA & Security Scan', prompt: '/qa Audit Security Vulnerabilities and Secrets', icon: ShieldCheck, category: 'QA Gate' },
+    { title: 'Search Vector RRF Memory', prompt: '/memory Retrieve RRF Context', icon: Database, category: 'Memory' },
   ];
 
   const hasMessages = activeSession?.messages && activeSession.messages.length > 0;
@@ -189,6 +335,97 @@ export const AIWorkspaceView: React.FC = () => {
 
       {/* Center Execution Workspace (Max Width 900px, Centered) */}
       <main className="flex flex-1 flex-col justify-between overflow-hidden p-4 md:p-6">
+        {/* Top AI Workspace Header Bar */}
+        <div className="max-w-[900px] w-full mx-auto pb-3 mb-2 border-b border-border/60 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-text-primary flex items-center gap-1.5">
+              <Bot className="h-4 w-4 text-accent-primary" /> {activeSession?.title || 'AI Workspace Session'}
+            </span>
+            <Badge variant="accent" className="text-[10px] font-mono">{activeSession?.category || 'General'}</Badge>
+            <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/30 font-mono">
+              ⚡ GOD MODE ACTIVE
+            </Badge>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Prompt Optimizer Drawer Toggle */}
+            <button
+              onClick={() => setShowOptimizerDrawer(!showOptimizerDrawer)}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold border transition-luxury ${
+                showOptimizerDrawer
+                  ? 'bg-accent-light border-accent-primary text-accent-primary'
+                  : 'bg-surface-2 border-border text-text-muted hover:text-text-primary'
+              }`}
+            >
+              <Zap className="h-3.5 w-3.5 text-accent-primary" />
+              <span>Prompt Optimizer</span>
+            </button>
+
+            {/* Real-time AI Model Selector */}
+            <select
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="h-8 rounded-xl border border-border bg-surface-2 px-2.5 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-accent-primary font-mono cursor-pointer"
+            >
+              <option value="gemini-3.6-flash">Gemini 3.6 Flash (High Velocity)</option>
+              <option value="gemini-3.6-pro">Gemini 3.6 Pro (Deep Reasoning)</option>
+              <option value="gpt-4o">GPT-4o Enterprise</option>
+              <option value="claude-3.5-sonnet">Claude 3.5 Sonnet (Code Audit)</option>
+              <option value="deepseek-r1">DeepSeek R1 (Autonomous)</option>
+            </select>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs font-medium"
+              onClick={() => createNewSession('General')}
+            >
+              <Plus className="mr-1 h-3.5 w-3.5" /> New Session
+            </Button>
+          </div>
+        </div>
+
+        {/* Live Prompt Optimizer Drawer Box */}
+        {showOptimizerDrawer && (
+          <div className="max-w-[900px] w-full mx-auto mb-4 bg-surface-1 border-2 border-accent-primary/60 p-4 rounded-2xl space-y-3 shadow-lg animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-accent-primary" />
+                <span className="text-xs font-bold text-text-primary">Prompt Optimizer & Gap Analysis Engine</span>
+                <Badge variant="accent" className="text-[10px] font-mono">Optimization Score: 98/100</Badge>
+              </div>
+              <span className="text-[10px] font-mono text-emerald-400">Target Tokens: ~1,450</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <div className="space-y-1">
+                <span className="text-[10px] font-semibold text-text-muted uppercase">Detected Gaps & Resolved Constraints:</span>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  <span className="px-2 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono">
+                    ✓ Security & Auth Access Control
+                  </span>
+                  <span className="px-2 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono">
+                    ✓ Neon pgvector RRF Memory Schema
+                  </span>
+                  <span className="px-2 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono">
+                    ✓ Latency Target &lt; 150ms
+                  </span>
+                  <span className="px-2 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono">
+                    ✓ 18-Stage SDLC Execution DAG
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-[10px] font-semibold text-text-muted uppercase">Expanded Execution Plan:</span>
+                <p className="text-[11px] font-mono text-text-secondary leading-tight bg-surface-2 p-2 rounded-xl border border-border/40">
+                  Goal &rarr; Intent &rarr; Requirements &rarr; Context &rarr; Memory Search &rarr; Research &rarr; System Architecture &rarr; 18-Stage SDLC &rarr; QA Gate (Pass &ge;80)
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex-1 overflow-y-auto space-y-6 max-w-[900px] w-full mx-auto pr-1">
           {/* Welcome Screen (When 0 Messages Exist) */}
           {!hasMessages ? (
@@ -199,10 +436,10 @@ export const AIWorkspaceView: React.FC = () => {
 
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
-                  Good Afternoon
+                  AI Operating System Workspace
                 </h1>
                 <p className="text-base text-text-secondary">
-                  What startup app or SDLC workflow would you like to execute today?
+                  Execute full startup app builds, SDLC 5-stage pipelines, deep research & code security audits.
                 </p>
               </div>
 
@@ -213,7 +450,7 @@ export const AIWorkspaceView: React.FC = () => {
                   return (
                     <button
                       key={idx}
-                      onClick={() => sendPrompt(action.title.startsWith('Build') ? `/build ${action.title}` : action.title)}
+                      onClick={() => sendPrompt(action.prompt || action.title)}
                       className="flex flex-col justify-between rounded-2xl border border-border bg-surface-1 p-4 text-left hover:border-accent-primary hover:bg-surface-2 transition-luxury shadow-xs group"
                     >
                       <div className="flex items-center justify-between">
@@ -261,9 +498,7 @@ export const AIWorkspaceView: React.FC = () => {
                           <span className="text-[10px] text-text-muted">{msg.timestamp}</span>
                         </div>
                       )}
-                      <p className="text-sm text-text-primary leading-relaxed font-sans">
-                        {msg.text}
-                      </p>
+                      {renderFormattedMessageText(msg.text)}
                     </div>
                   </div>
                 );

@@ -6,7 +6,7 @@
 export interface AuditRecord {
   id: string;
   timestamp: string;
-  category: 'API_CALL' | 'USER_ACTION' | 'WORKFLOW' | 'AGENT_CALL' | 'SECURITY' | 'AUTH';
+  category: 'API_CALL' | 'USER_ACTION' | 'WORKFLOW' | 'AGENT_CALL' | 'SECURITY' | 'AUTH' | 'PROJECT' | 'TASK' | 'INTEGRATION';
   actor: string;
   action: string;
   target: string;

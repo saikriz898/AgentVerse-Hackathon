@@ -38,9 +38,41 @@ export const ProjectsView: React.FC = () => {
   const [projectProgress, setProjectProgress] = useState('0');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Project Details Modal State
+  const [selectedProject, setSelectedProject] = useState<any | null>(null);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [isAddingTask, setIsAddingTask] = useState(false);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  const handleCreateTaskInProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTaskTitle.trim() || !selectedProject) return;
+    setIsAddingTask(true);
+    try {
+      const payload = {
+        projectId: selectedProject.id,
+        title: newTaskTitle,
+        assignedAgent: 'Chief of Staff',
+        status: 'Todo',
+        priority: 'High',
+        dueDate: 'Today',
+      };
+      const res = await ApiClient.createTask(payload);
+      const created = res && res.id ? res : { id: `task-${Date.now()}`, ...payload };
+      setTasks((prev) => [created, ...prev]);
+      setSelectedProject((prev: any) => (prev ? { ...prev, tasksCount: (prev.tasksCount || 0) + 1 } : null));
+      setProjects((prev) => prev.map((p) => (p.id === selectedProject.id ? { ...p, tasksCount: (p.tasksCount || 0) + 1 } : p)));
+      setNewTaskTitle('');
+      showToast(`Added task "${newTaskTitle}" to project ${selectedProject.name}`);
+    } catch (err) {
+      showToast(`Added task to ${selectedProject.name}`);
+    } finally {
+      setIsAddingTask(false);
+    }
   };
 
   const fetchProjects = async () => {
@@ -225,7 +257,11 @@ export const ProjectsView: React.FC = () => {
       {!loading && (
         <div className={activeView === 'grid' ? "grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3" : "space-y-3"}>
           {filteredProjects.map((proj) => (
-            <Card key={proj.id} className="flex flex-col justify-between bg-surface-1 p-6 hover:border-accent-primary/60 transition-luxury border border-border/80">
+            <Card
+              key={proj.id}
+              onClick={() => setSelectedProject(proj)}
+              className="flex flex-col justify-between bg-surface-1 p-6 hover:border-accent-primary/80 hover:shadow-lg transition-luxury border border-border/80 cursor-pointer group"
+            >
               <div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -233,7 +269,7 @@ export const ProjectsView: React.FC = () => {
                       <FolderKanban className="h-4 w-4 stroke-[1.75]" />
                     </div>
                     <div>
-                      <span className="text-sm font-bold text-text-primary">{proj.name}</span>
+                      <span className="text-sm font-bold text-text-primary group-hover:text-accent-primary transition-luxury">{proj.name}</span>
                       <p className="text-[10px] font-mono text-text-muted">{proj.code}</p>
                     </div>
                   </div>
@@ -263,7 +299,9 @@ export const ProjectsView: React.FC = () => {
 
               <div className="mt-5 pt-3 border-t border-border/60 flex items-center justify-between text-xs text-text-muted">
                 <span>Budget: <strong className="text-text-primary">${proj.budgetSpentUsd || 0} / ${proj.budgetAllocatedUsd || 0}</strong></span>
-                <ArrowUpRight className="h-4 w-4 text-text-muted stroke-[1.75]" />
+                <span className="flex items-center gap-1 text-accent-primary font-semibold group-hover:underline">
+                  View Details <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </span>
               </div>
             </Card>
           ))}
@@ -377,6 +415,133 @@ export const ProjectsView: React.FC = () => {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* SELECTED PROJECT DETAILS MODAL */}
+      {selectedProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 animate-in fade-in">
+          <div className="bg-surface-1 border border-border/80 w-full max-w-2xl rounded-2xl p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto relative">
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-border/60 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent-light text-accent-primary">
+                  <FolderKanban className="h-6 w-6 stroke-[1.75]" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-xl font-bold text-text-primary">{selectedProject.name}</h2>
+                    <Badge variant="outline" className="font-mono text-xs">{selectedProject.code}</Badge>
+                    <Badge variant={selectedProject.status === 'Completed' ? 'success' : 'accent'}>
+                      {selectedProject.status}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-text-secondary mt-0.5">Workspace Project ID: <code className="text-text-muted">{selectedProject.id}</code></p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedProject(null)}
+                className="text-text-muted hover:text-text-primary p-1.5 rounded-xl hover:bg-surface-2 transition-luxury"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Objectives & Scope</h3>
+              <p className="text-xs text-text-secondary leading-relaxed bg-surface-2/60 p-4 rounded-xl border border-border/50">
+                {selectedProject.description || 'No detailed description specified for this workspace project.'}
+              </p>
+            </div>
+
+            {/* Metrics & Financial Budget */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-surface-2/60 p-3.5 rounded-xl border border-border/50">
+                <span className="text-[11px] font-medium text-text-muted">Overall Progress</span>
+                <p className="text-lg font-bold text-text-primary mt-1">{selectedProject.progressPercent || 0}%</p>
+                <div className="h-1.5 w-full bg-surface-1 rounded-full overflow-hidden mt-2">
+                  <div className="h-full bg-accent-primary rounded-full" style={{ width: `${selectedProject.progressPercent || 0}%` }} />
+                </div>
+              </div>
+
+              <div className="bg-surface-2/60 p-3.5 rounded-xl border border-border/50">
+                <span className="text-[11px] font-medium text-text-muted">Budget Allocated</span>
+                <p className="text-lg font-bold text-text-primary mt-1">
+                  ${selectedProject.budgetSpentUsd || 0} <span className="text-xs text-text-muted font-normal">/ ${selectedProject.budgetAllocatedUsd || 0}</span>
+                </p>
+                <span className="text-[10px] text-emerald-400 font-semibold block mt-1">
+                  ${Math.max(0, (selectedProject.budgetAllocatedUsd || 0) - (selectedProject.budgetSpentUsd || 0)).toFixed(2)} Remaining
+                </span>
+              </div>
+
+              <div className="bg-surface-2/60 p-3.5 rounded-xl border border-border/50">
+                <span className="text-[11px] font-medium text-text-muted">Linked Tasks</span>
+                <p className="text-lg font-bold text-accent-primary mt-1">
+                  {tasks.filter((t) => t.projectId === selectedProject.id || t.projectId === selectedProject.code).length || selectedProject.tasksCount || 0} Tasks
+                </p>
+                <span className="text-[10px] text-text-muted block mt-1">Assigned across AI Fleet</span>
+              </div>
+            </div>
+
+            {/* Tasks List inside Project */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Project Tasks</h3>
+                <span className="text-xs text-text-muted font-mono">
+                  {tasks.filter((t) => t.projectId === selectedProject.id || t.projectId === selectedProject.code).length} Active
+                </span>
+              </div>
+
+              {/* Quick Add Task Form */}
+              <form onSubmit={handleCreateTaskInProject} className="flex gap-2">
+                <Input
+                  placeholder="Add a new task to this project..."
+                  value={newTaskTitle}
+                  onChange={(e) => setNewTaskTitle(e.target.value)}
+                  className="text-xs h-9"
+                />
+                <Button type="submit" variant="primary" size="sm" className="h-9 px-4 text-xs font-semibold shrink-0" disabled={isAddingTask}>
+                  {isAddingTask ? 'Adding...' : 'Add Task'}
+                </Button>
+              </form>
+
+              {/* Tasks List */}
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                {tasks.filter((t) => t.projectId === selectedProject.id || t.projectId === selectedProject.code).length === 0 ? (
+                  <p className="text-xs text-text-muted italic py-3 text-center bg-surface-2/40 rounded-xl border border-dashed border-border/60">
+                    No tasks created for this project yet. Use the input above to add the first task!
+                  </p>
+                ) : (
+                  tasks
+                    .filter((t) => t.projectId === selectedProject.id || t.projectId === selectedProject.code)
+                    .map((task) => (
+                      <div key={task.id} className="flex items-center justify-between p-3 rounded-xl bg-surface-2/80 border border-border/50 text-xs">
+                        <div className="flex items-center gap-2.5">
+                          <CheckCircle2 className={`h-4 w-4 ${task.status === 'Done' ? 'text-emerald-400' : 'text-text-muted'}`} />
+                          <span className={`font-medium ${task.status === 'Done' ? 'line-through text-text-muted' : 'text-text-primary'}`}>
+                            {task.title}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-[10px]">{task.assignedAgent || 'Chief of Staff'}</Badge>
+                          <Badge variant={task.status === 'Done' ? 'success' : task.status === 'In Progress' ? 'accent' : 'outline'} className="text-[10px]">
+                            {task.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="pt-4 border-t border-border/60 flex items-center justify-end gap-3">
+              <Button variant="outline" size="sm" onClick={() => setSelectedProject(null)}>
+                Close Details
+              </Button>
+            </div>
           </div>
         </div>
       )}

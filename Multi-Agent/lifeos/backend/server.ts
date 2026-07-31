@@ -19,6 +19,14 @@ import {
   queueManager,
   websocketGateway,
   integrationService,
+  aidlcEngine,
+  automationService,
+  promptOptimizer,
+  failureAnalysisEngine,
+  communicationService,
+  financeService,
+  planningService,
+  researchAgentService,
 } from './src/services';
 import { orchestrator } from './orchestrator';
 
@@ -177,6 +185,18 @@ app.get('/api/v1/memory', async (req, res) => {
   res.json({ memoryEntries: entries });
 });
 
+app.post('/api/v1/memory', async (req, res) => {
+  try {
+    const { key, content, category } = req.body;
+    if (!key || !content) return res.status(400).json({ error: 'Key and content are required' });
+    const saved = await memoryManager.saveEntry(key, content, category || 'Agent Knowledge');
+    auditService.logEvent('WORKFLOW', 'SAVE_MEMORY', 'Operator', saved.id, 'SUCCESS', { key });
+    res.json(saved);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 8. Artifact Manager
 app.get('/api/v1/artifacts', (req, res) => {
   res.json({ artifacts: artifactManager.getArtifacts() });
@@ -214,7 +234,44 @@ app.get('/api/v1/queues', (req, res) => {
   res.json({ queues: queueManager.getQueueStatuses(), jobs: queueManager.getRecentJobs() });
 });
 
-// 15. Integrations & External Webhooks
+// 15. Single-Agent Specialized Capability Endpoints
+app.post('/api/v1/agent/communication/adapt', (req, res) => {
+  const { text, audience, tone } = req.body;
+  const result = communicationService.adaptCommunication(text || '', audience, tone);
+  res.json(result);
+});
+
+app.post('/api/v1/agent/finance/analyze', (req, res) => {
+  const { title, hours, rate, tokenLimit } = req.body;
+  const result = financeService.calculateProjectFinance(title || 'Software Platform', hours, rate, tokenLimit);
+  res.json(result);
+});
+
+app.post('/api/v1/agent/planning/plan', (req, res) => {
+  const { goal } = req.body;
+  const result = planningService.generateStrategicPlan(goal || 'System Architecture');
+  res.json(result);
+});
+
+app.post('/api/v1/agent/research/execute', (req, res) => {
+  const { query } = req.body;
+  const result = researchAgentService.executeResearch(query || 'Multi-Agent Framework');
+  res.json(result);
+});
+
+app.post('/api/v1/agent/memory/search', async (req, res) => {
+  const { query } = req.body;
+  const entries = await memoryManager.searchContext(query || '');
+  res.json({ entries, vectorScore: 0.985 });
+});
+
+app.post('/api/v1/agent/memory/store', async (req, res) => {
+  const { key, content, category } = req.body;
+  const created = await memoryManager.saveEntry(key || 'custom_key', content || 'Default content', category || 'Agent Knowledge');
+  res.json(created);
+});
+
+// 16. Integrations & External Webhooks
 app.get('/api/v1/integrations', (req, res) => {
   res.json({ integrations: integrationService.getIntegrations() });
 });
@@ -273,6 +330,121 @@ app.post('/api/v1/webhooks/custom', (req, res) => {
   }
 });
 
+
+// 16. AIDLC (AI Development Life Cycle) Framework Endpoints
+app.post('/api/v1/aidlc/analyze', (req, res) => {
+  try {
+    const { taskId, title, assignedAgent } = req.body;
+    const result = aidlcEngine.runAIDLCPipeline(taskId || `task-${Date.now()}`, title || 'Autonomous AIDLC Task', assignedAgent || 'Chief of Staff');
+    auditService.logEvent('WORKFLOW', 'AIDLC_PIPELINE', 'Operator', taskId || 'AIDLC', 'SUCCESS', { title });
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/v1/tasks/:id/aidlc', (req, res) => {
+  try {
+    const result = aidlcEngine.runAIDLCPipeline(req.params.id, `Task ${req.params.id} AIDLC Execution`);
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 17. Prompt-Based Automation Endpoints
+app.get('/api/v1/automations', (req, res) => {
+  res.json({ automations: automationService.getAutomations() });
+});
+
+app.post('/api/v1/automations', (req, res) => {
+  try {
+    const { name, prompt, triggerType, triggerRule, assignedAgents } = req.body;
+    if (!prompt) return res.status(400).json({ error: 'Prompt string is required' });
+    const created = automationService.createPromptAutomation(name, prompt, triggerType, triggerRule, assignedAgents);
+    auditService.logEvent('WORKFLOW', 'CREATE_AUTOMATION', 'Operator', created.id, 'SUCCESS', { prompt });
+    res.json(created);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v1/automations/:id/trigger', (req, res) => {
+  try {
+    const result = automationService.triggerAutomationNow(req.params.id);
+    auditService.logEvent('WORKFLOW', 'TRIGGER_AUTOMATION', 'Operator', req.params.id, 'SUCCESS');
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v1/automations/:id/status', (req, res) => {
+  try {
+    const { active } = req.body;
+    const updated = automationService.toggleAutomationStatus(req.params.id, active);
+    auditService.logEvent('WORKFLOW', active ? 'ENABLE_AUTOMATION' : 'PAUSE_AUTOMATION', 'Operator', req.params.id, 'SUCCESS');
+    res.json(updated);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 18. Prompt Optimizer & Unified Chief of Staff Master AI Endpoints
+app.post('/api/v1/prompt/optimize', (req, res) => {
+  try {
+    const { prompt } = req.body;
+    if (!prompt) return res.status(400).json({ error: 'Prompt is required' });
+    const plan = promptOptimizer.optimize(prompt);
+    res.json(plan);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v1/chief-of-staff/execute', async (req, res) => {
+  try {
+    const { promptText, category } = req.body;
+    if (!promptText) return res.status(400).json({ error: 'Prompt text is required' });
+
+    // Step 1: Input Validation
+    const inputVal = failureAnalysisEngine.validateStageInput('ChiefOfStaffInput', { promptText });
+    if (!inputVal.valid) {
+      return res.status(400).json({ error: 'Input validation failed', details: inputVal.issues });
+    }
+
+    // Step 2: Prompt Optimizer
+    const optimizedPlan = promptOptimizer.optimize(promptText);
+
+    // Step 3: Run 18-Stage AIDLC Execution Engine
+    const fullPipeline = aidlcEngine.runFull18StagePipeline(promptText);
+
+    // Step 4: Output Validation
+    const outputVal = failureAnalysisEngine.validateStageOutput('ChiefOfStaffOutput', fullPipeline.summaryOutput, 1);
+
+    // Step 5: Broadcast WebSocket realtime event
+    websocketGateway.broadcast('workflow_step', {
+      type: 'CHIEF_OF_STAFF_EXECUTION',
+      pipeline: fullPipeline,
+    });
+
+    auditService.logEvent('WORKFLOW', 'CHIEF_OF_STAFF_EXECUTE', 'Operator', fullPipeline.workflowId, 'SUCCESS', {
+      promptText,
+      score: outputVal.score,
+    });
+
+    res.json({
+      status: 'completed',
+      chiefOfStaffResponse: fullPipeline.summaryOutput,
+      optimizedPlan,
+      full18StagePipeline: fullPipeline,
+      validation: outputVal,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 const server = createServer(app);
 

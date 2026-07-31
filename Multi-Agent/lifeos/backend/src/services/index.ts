@@ -21,4 +21,15 @@ export * from './aiProviderManager';
 export * from './queueManager';
 export * from './websocketGateway';
 export * from './integrationService';
+export * from './aidlcEngine';
+export * from './automationService';
+export * from './promptOptimizer';
+export * from './failureAnalysisEngine';
+export * from './communicationService';
+export * from './financeService';
+export * from './planningService';
+export * from './researchAgentService';
+
+
+
 
